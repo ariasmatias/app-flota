@@ -1,0 +1,29 @@
+# Variables de entorno
+.env
+.env.*
+!.env.example
+# JavaScript
+node_modules/
+dist/
+build/
+coverage/
+.npm/
+*.tsbuildinfo
+# Logs y temporales
+*.log
+tmp/
+temp/
+# Archivos de usuarios y exportaciones
+uploads/
+*.dump
+*.backup
+# Claves y certificados privados
+*.key
+*.pem
+*.p12
+*.pfx
+# IDE y sistema operativo
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

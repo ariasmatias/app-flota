@@ -1,0 +1,19 @@
+# Vista previa en Netlify, SOLO para ver avances durante el desarrollo.
+# Producción va en la VM de AUBASA (intranet), no acá.
+# Usa usuarios y datos ficticios: nunca configurar datos ni credenciales reales.
+
+[build]
+  base = "frontend"
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+  # Login simulado con "Ver como": todavía no hay backend ni Active Directory.
+  VITE_AUTH_MODE = "development"
+
+# Sin esto, recargar la página en /mantenimiento da error 404.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

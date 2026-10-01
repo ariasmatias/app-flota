@@ -1,0 +1,254 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   Flota AUBASA · estilo "Cristal"
+   Paleta del Manual de Marca AUBASA v6. Tipografía oficial: Encode Sans.
+   Todo lo que cambia entre modo claro y oscuro vive en variables: el modo
+   oscuro solo agrega la clase `dark` a <body> (ver core/tema/TemaContext).
+   ═══════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Marca (no cambian con el tema) */
+  --aubasa: #00aec3;          /* institucional */
+  --aubasa-oscuro: #00759a;
+  --aubasa-profundo: #024560;
+  --aubasa-suave: #74c9e3;
+  --gris-marca: #838383;
+  --rosa: #e81f76;            /* acento: usar con poca frecuencia */
+  --azul: #417099;
+  --rojo: #be1717;
+  --verde: #22a954;
+  --degrade: linear-gradient(120deg, #e81f76 0%, #417099 50%, #00aec3 100%);
+
+  /* Tema claro */
+  --fondo: #eaf4f7;
+  --texto: #14303f;
+  --texto-2: #557080;
+  --vidrio: rgba(255, 255, 255, 0.55);
+  --vidrio-hover: rgba(255, 255, 255, 0.78);
+  --vidrio-borde: rgba(255, 255, 255, 0.85);
+  --sombra: 0 8px 32px rgba(2, 69, 96, 0.1);
+  --opacidad-manchas: 0.55;
+
+  --radio: 24px;
+  --radio-chico: 16px;
+
+  color-scheme: light;
+  font-family: 'Encode Sans', Verdana, sans-serif;
+  color: var(--texto);
+  background: var(--fondo);
+}
+
+body.dark {
+  color-scheme: dark;
+  --fondo: #08131b;
+  --texto: #e6f1f5;
+  --texto-2: #93abb8;
+  --vidrio: rgba(255, 255, 255, 0.06);
+  --vidrio-hover: rgba(255, 255, 255, 0.11);
+  --vidrio-borde: rgba(255, 255, 255, 0.14);
+  --sombra: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --opacidad-manchas: 0.3;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  background: var(--fondo);
+  color: var(--texto);
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+h1, h2, h3, p { margin: 0; }
+a { color: inherit; }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--aubasa); outline-offset: 2px; }
+
+/* ───────────── Vidrio (base reutilizable) ───────────── */
+.vidrio {
+  background: var(--vidrio);
+  border: 1px solid var(--vidrio-borde);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  box-shadow: var(--sombra);
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+/* ───────────── Fondo con manchas de color ───────────── */
+.app { position: relative; min-height: 100vh; overflow-x: hidden; }
+.fondo { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+.mancha {
+  position: absolute; border-radius: 50%; filter: blur(70px);
+  opacity: var(--opacidad-manchas); transition: opacity 0.3s ease;
+}
+.mancha-1 { width: 520px; height: 520px; background: var(--aubasa); top: -160px; left: -120px; }
+.mancha-2 { width: 440px; height: 440px; background: var(--rosa); top: 120px; right: -140px; opacity: calc(var(--opacidad-manchas) * 0.65); }
+.mancha-3 { width: 520px; height: 520px; background: var(--azul); bottom: -220px; left: 35%; }
+
+.capa { position: relative; max-width: 1180px; margin: 0 auto; padding: 20px 24px 64px; }
+
+/* ───────────── Barra de modo desarrollo ───────────── */
+.barra-dev {
+  --vidrio: rgba(255, 216, 77, 0.35);
+  --vidrio-borde: rgba(201, 168, 0, 0.45);
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px;
+  margin-bottom: 12px; padding: 8px 16px; border-radius: var(--radio-chico);
+  font-size: 13px; color: #5a4800;
+}
+body.dark .barra-dev { color: #ffe27a; --vidrio: rgba(255, 216, 77, 0.12); --vidrio-borde: rgba(255, 216, 77, 0.3); }
+.barra-dev label { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+.barra-dev select {
+  padding: 4px 8px; border-radius: 999px; border: 1px solid rgba(201, 168, 0, 0.5);
+  background: rgba(255, 255, 255, 0.6); color: #3d3200;
+}
+body.dark .barra-dev select { background: rgba(0, 0, 0, 0.3); color: #ffe27a; }
+
+/* ───────────── Barra superior ───────────── */
+.barra {
+  display: flex; align-items: center; gap: 16px;
+  padding: 10px 12px 10px 20px; border-radius: 22px;
+}
+.barra-marca { display: flex; align-items: center; gap: 16px; text-decoration: none; }
+.logo { height: 34px; display: block; transition: filter 0.3s ease; }
+body.dark .logo { filter: brightness(0) invert(1); }
+.barra-app {
+  font-weight: 700; color: var(--texto-2);
+  padding-left: 16px; border-left: 1px solid var(--vidrio-borde);
+}
+.barra-der { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+
+.buscador {
+  margin-left: auto; display: flex; align-items: center; gap: 8px;
+  min-width: 260px; padding: 9px 14px; border-radius: 999px;
+  background: var(--vidrio); border: 1px solid var(--vidrio-borde); color: var(--texto-2);
+}
+.buscador:focus-within { border-color: var(--aubasa); box-shadow: 0 0 0 3px rgba(0, 174, 195, 0.2); }
+.buscador input { border: 0; outline: 0; background: transparent; width: 100%; color: var(--texto); }
+.buscador + .barra-der { margin-left: 0; }
+
+.boton-redondo {
+  width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; cursor: pointer;
+  background: var(--vidrio); border: 1px solid var(--vidrio-borde); color: var(--texto-2);
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+.boton-redondo:hover { background: var(--vidrio-hover); color: var(--texto); transform: translateY(-1px); }
+
+.usuario { display: flex; align-items: center; gap: 10px; padding-right: 6px; }
+.avatar {
+  width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; flex-shrink: 0;
+  background: var(--degrade); color: #fff; font-weight: 700; font-size: 14px;
+}
+.usuario-datos b { display: block; font-size: 14px; }
+.usuario-datos small { display: block; font-size: 12px; font-weight: 600; color: var(--aubasa); }
+
+/* ───────────── Contenido ───────────── */
+.contenido { padding-top: 8px; }
+.estado { color: var(--texto-2); padding: 24px 4px; }
+.estado-error { color: var(--rojo); }
+
+/* ───────────── Inicio ───────────── */
+.saludo { margin: 40px 4px 10px; }
+.saludo h1 { font-size: 40px; font-weight: 800; letter-spacing: -0.01em; }
+.saludo p { margin-top: 4px; color: var(--texto-2); font-size: 17px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 12px; border-radius: 999px; font-size: 12.5px; font-weight: 700; text-decoration: none;
+  color: var(--c);
+  background: color-mix(in srgb, var(--c) 13%, transparent);
+  border: 1px solid color-mix(in srgb, var(--c) 38%, transparent);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+}
+a.chip:hover { background: color-mix(in srgb, var(--c) 22%, transparent); }
+body.dark .chip { color: color-mix(in srgb, var(--c) 55%, #fff); }
+
+.seccion {
+  margin: 30px 4px 12px; font-size: 13px; font-weight: 800;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--texto-2);
+}
+
+.grilla { display: grid; grid-template-columns: repeat(auto-fill, minmax(205px, 1fr)); gap: 18px; }
+
+/* ───────────── Tarjeta de módulo ───────────── */
+.tarjeta {
+  position: relative; display: flex; flex-direction: column; gap: 10px;
+  padding: 22px; border-radius: var(--radio); text-decoration: none; color: inherit;
+}
+.tarjeta, .pagina-encabezado { --c: var(--c1); }
+body.dark .tarjeta, body.dark .pagina-encabezado { --c: var(--c2); }
+.tarjeta:hover, .tarjeta:focus-visible {
+  transform: translateY(-5px); background: var(--vidrio-hover);
+  box-shadow: 0 18px 40px color-mix(in srgb, var(--c) 22%, transparent);
+}
+.tarjeta-icono {
+  width: 54px; height: 54px; border-radius: var(--radio-chico); flex-shrink: 0;
+  display: grid; place-items: center; color: var(--c);
+  background: color-mix(in srgb, var(--c) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--c) 30%, transparent);
+  transition: transform 0.25s ease;
+}
+.tarjeta:hover .tarjeta-icono { transform: scale(1.06); }
+.tarjeta-titulo { margin-top: 6px; font-size: 20px; font-weight: 800; }
+.tarjeta-descripcion { color: var(--texto-2); font-size: 14px; line-height: 1.45; }
+.tarjeta-abrir {
+  margin-top: auto; padding-top: 6px; display: flex; align-items: center; gap: 2px;
+  font-size: 13.5px; font-weight: 700; color: var(--c);
+}
+.globito {
+  position: absolute; top: 16px; right: 16px; min-width: 24px; height: 24px; padding: 0 7px;
+  border-radius: 12px; display: grid; place-items: center;
+  background: var(--rosa); color: #fff; font-size: 12.5px; font-weight: 800;
+  box-shadow: 0 3px 10px rgba(232, 31, 118, 0.4);
+}
+
+/* ───────────── Páginas de módulo ───────────── */
+.pagina { display: flex; flex-direction: column; gap: 18px; margin-top: 24px; }
+.volver {
+  display: inline-flex; align-items: center; gap: 6px; align-self: flex-start;
+  color: var(--aubasa-oscuro); font-weight: 700; font-size: 14px; text-decoration: none;
+}
+body.dark .volver { color: var(--aubasa); }
+.volver:hover { text-decoration: underline; }
+
+.pagina-encabezado { display: flex; align-items: center; gap: 16px; padding: 22px 24px; border-radius: var(--radio); }
+.pagina-encabezado h1 { font-size: 28px; font-weight: 800; }
+.pagina-encabezado p { margin-top: 2px; color: var(--texto-2); }
+
+.aviso {
+  --vidrio: rgba(183, 121, 31, 0.1); --vidrio-borde: rgba(183, 121, 31, 0.3);
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 16px 20px; border-radius: var(--radio-chico); color: #8a5a10;
+}
+body.dark .aviso { color: #f0c060; }
+.aviso p { margin-top: 2px; font-size: 14px; }
+
+.pagina-centrada {
+  display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center;
+  margin: 48px auto 0; max-width: 520px; padding: 40px 28px; border-radius: var(--radio);
+}
+.pagina-centrada h1 { font-size: 24px; font-weight: 800; }
+.pagina-centrada p { color: var(--texto-2); }
+.boton {
+  margin-top: 8px; display: inline-block; padding: 10px 20px; border-radius: 999px;
+  background: var(--aubasa); color: #fff; font-weight: 700; text-decoration: none;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+.boton:hover { background: var(--aubasa-oscuro); transform: translateY(-1px); }
+
+/* ───────────── Celular ───────────── */
+@media (max-width: 760px) {
+  .barra-app, .usuario-datos { display: none; }
+}
+@media (max-width: 620px) {
+  .capa { padding: 12px 12px 48px; }
+  .barra { flex-wrap: wrap; padding: 10px 12px; }
+  .buscador { order: 3; min-width: 0; flex: 1 1 100%; margin-left: 0; }
+  .barra-der, .buscador + .barra-der { margin-left: auto; }
+  .saludo { margin-top: 26px; }
+  .saludo h1 { font-size: 30px; }
+  .grilla { grid-template-columns: 1fr; }
+}
+
+/* Accesibilidad: sin animaciones si el usuario lo pidió en su sistema */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; }
+}

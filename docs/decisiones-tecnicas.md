@@ -6,7 +6,7 @@
 | React para frontend | Confirmada | Elección del equipo |
 | PostgreSQL para datos propios | Prevista | Modelo relacional propio |
 | Framework de backend | Pendiente | Evaluar una solución JavaScript |
-| Herramientas de frontend y versiones | Pendiente | Acordar al iniciar implementación |
+| Herramientas de frontend y versiones | Propuesta (feature/frontend-base) | Node 22 LTS, Vite 8, React 19, React Router 7, lucide-react (íconos) y Encode Sans incluida en el build. CSS propio sin framework, diseño "Cristal" (vidrio esmerilado, modo claro/oscuro) con la paleta del Manual de Marca v6. Sin dependencias de CDN |
 | Herramienta de migraciones | Pendiente | Seleccionar junto con el backend |
 | Monorepositorio | Adoptada | Código y documentación juntos |
 | GitHub público | Confirmada | Preferencia del responsable |

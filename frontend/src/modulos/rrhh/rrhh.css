@@ -1,0 +1,56 @@
+.rrhh { gap: 20px; }
+.rrhh-cabecera { display: flex; gap: 18px; align-items: center; padding: 10px 0; }
+.rrhh-cabecera h1 { font-size: 32px; letter-spacing: -.025em; margin: 4px 0; }
+.rrhh-cabecera p, .rrhh-muted { color: var(--texto-2); font-size: 14px; line-height: 1.6; }
+.rrhh-icono { color: var(--rosa); background: color-mix(in srgb, var(--rosa) 12%, transparent); padding: 18px; border-radius: 20px; }
+.rrhh-kicker { font-size: 11px; font-weight: 800; letter-spacing: .12em; color: var(--texto-2); }
+.rrhh-demo { padding: 12px 16px; border-radius: 12px; background: color-mix(in srgb, var(--aubasa) 9%, transparent); color: var(--texto-2); font-size: 13px; line-height: 1.6; }
+.rrhh-resumen { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.rrhh-resumen > * { border-radius: 20px; padding: 20px 24px; text-align: left; color: var(--texto); font: inherit; }
+.rrhh-resumen button { cursor: pointer; }
+.rrhh-resumen button:hover { background: var(--vidrio-hover); }
+.rrhh-resumen span { font-weight: 600; font-size: 14px; }
+.rrhh-resumen strong { display: block; font-size: 38px; margin: 6px 0; }
+.rrhh-resumen small { color: var(--texto-2); font-size: 12px; }
+.rrhh-tabs { display: flex; gap: 6px; border-bottom: 1px solid var(--vidrio-borde); }
+.rrhh-tabs button { cursor: pointer; border: 0; background: transparent; color: var(--texto-2); padding: 14px 20px; font-weight: 700; border-bottom: 3px solid transparent; }
+.rrhh-tabs button[aria-current] { border-color: var(--rosa); color: var(--texto); }
+.rrhh-panel { border-radius: 20px; padding: 24px; }
+.rrhh-panel h2 { font-size: 22px; margin-bottom: 4px; }
+.rrhh-panel h3 { font-size: 18px; margin-bottom: 8px; }
+.rrhh-panel-titulo { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.rrhh-filtros { display: flex; gap: 14px; align-items: center; margin: 20px 0; flex-wrap: wrap; }
+.rrhh input:not([type=checkbox]), .rrhh select { background: var(--vidrio); border: 1px solid color-mix(in srgb, var(--texto-2) 35%, transparent); border-radius: 10px; padding: 10px 12px; max-width: 100%; }
+.rrhh-busqueda { display: flex; gap: 8px; align-items: center; flex: 1; }
+.rrhh-busqueda input { width: 100%; }
+.rrhh-scroll { overflow-x: auto; margin-top: 16px; }
+.rrhh table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+.rrhh th { font-size: 11px; color: var(--texto-2); font-weight: 700; padding: 13px 12px; background: color-mix(in srgb, var(--aubasa) 6%, transparent); }
+.rrhh td { padding: 17px 12px; border-bottom: 1px solid var(--vidrio-borde); }
+.rrhh td small { display: block; margin-top: 4px; color: var(--texto-2); }
+.rrhh-etiqueta { display: inline-block; font-size: 11px; font-weight: 700; border-radius: 999px; padding: 5px 10px; background: color-mix(in srgb, var(--aubasa) 12%, transparent); white-space: nowrap; }
+.rrhh-etiqueta.error { background: color-mix(in srgb, var(--rojo) 12%, transparent); }
+.rrhh-etiqueta.alerta { background: color-mix(in srgb, #b7791f 16%, transparent); }
+.rrhh-enlace { cursor: pointer; background: transparent; border: 0; color: var(--aubasa-oscuro); display: inline-flex; gap: 4px; align-items: center; padding: 4px 0; font-size: 13px; font-weight: 700; text-align: left; overflow-wrap: anywhere; }
+body.dark .rrhh-enlace { color: var(--aubasa-suave); }
+.rrhh-enlace:hover { text-decoration: underline; }
+.rrhh-vacio { padding: 32px; text-align: center; color: var(--texto-2); }
+.rrhh-datos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin: 24px 0; }
+.rrhh-datos dt { color: var(--texto-2); font-size: 12px; margin-bottom: 6px; }
+.rrhh-datos dd { margin: 0; font-weight: 600; font-size: 14px; }
+.rrhh-boton { background: var(--aubasa-oscuro); color: #fff; border: 0; border-radius: 10px; padding: 12px 18px; font-weight: 700; cursor: pointer; align-self: flex-start; }
+.rrhh-boton:hover { background: var(--aubasa-profundo); }
+.rrhh-boton:disabled { opacity: .6; cursor: wait; }
+.rrhh-acciones { margin-top: 20px; }
+.rrhh-form { display: flex; flex-direction: column; gap: 16px; }
+.rrhh-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.rrhh-form-grid label, .rrhh-panel-titulo label { display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; }
+.rrhh-form fieldset { border: 1px solid var(--vidrio-borde); border-radius: 12px; padding: 16px; }
+.rrhh-form legend { font-size: 13px; font-weight: 700; }
+.rrhh-categorias { display: flex; flex-wrap: wrap; gap: 12px 20px; font-size: 13px; }
+.rrhh-categorias label { display: flex; align-items: center; gap: 6px; }
+.rrhh-error { color: var(--rojo); }
+body.dark .rrhh-error { color: #ff9b9b; }
+.rrhh-feedback { padding: 12px 16px; background: color-mix(in srgb, var(--verde) 12%, transparent); border-radius: 10px; font-size: 14px; }
+.rrhh-historial { padding: 12px 0; border-bottom: 1px solid var(--vidrio-borde); font-size: 13px; }
+@media (max-width: 700px) { .rrhh-resumen { grid-template-columns: 1fr; } .rrhh-resumen > * { padding: 16px 20px; } .rrhh-resumen strong { font-size: 28px; } .rrhh-tabs { overflow-x: auto; } .rrhh-tabs button { white-space: nowrap; padding: 12px; font-size: 13px; } .rrhh-panel { padding: 18px; } .rrhh-panel-titulo { flex-direction: column; align-items: flex-start; } .rrhh-datos, .rrhh-form-grid { grid-template-columns: 1fr; } .rrhh-cabecera h1 { font-size: 26px; } }

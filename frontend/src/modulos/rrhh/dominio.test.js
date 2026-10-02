@@ -1,7 +1,10 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { vigenteEn, renovarLicencia, gestionarMulta, contextoMulta, hoy, estadoLicencia } from './dominio.js'
-import { datosIniciales } from './servicioDemo.js'
+import { readFileSync } from 'node:fs'
+import { datosDesdeSeed } from './leerSeed.js'
+const seed = readFileSync(new URL('../../../../database/seed/001_datos_demo.sql', import.meta.url), 'utf8')
+const datosIniciales = () => datosDesdeSeed(seed)
 
 test('renovar conserva categorías y documento anteriores, sin superposición al cierre', () => {
   const originales = [{ id: 1, persona_id: 1, nro_registro: 'ANTERIOR', categorias: ['B.1'], vigente_desde: '2025-01-01', vigente_hasta: null, documento: { nombre: 'anterior.pdf' } }]
@@ -19,7 +22,7 @@ test('renovar conserva categorías y documento anteriores, sin superposición al
 test('multas consultan asignaciones y centro de costo a la fecha de infracción', () => {
   const datos = datosIniciales()
   const contexto = contextoMulta(datos, datos.multas[0])
-  assert.equal(contexto.centro, 'Operaciones · ejemplo')
+  assert.equal(contexto.centro, 'Operaciones (ejemplo)')
   assert.deepEqual(contexto.conductores.map(p => p.id), [1, 2])
   assert.throws(() => gestionarMulta(datos, 1, { responsable_id: 3 }), /asignado/)
   assert.throws(() => gestionarMulta(datos, 1, { responsable_id: 1, estado_pago: 'pagada' }), /fecha de pago/)

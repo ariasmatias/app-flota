@@ -1,5 +1,9 @@
 # Autenticación corporativa
 
-Pendiente del mecanismo autorizado por Infraestructura. Prever un contrato de identidad separado de los roles de la aplicación. SSO o Kerberos son posibilidades, no compromisos de implementación.
+Kerberos/SPNEGO seleccionado. Según la validación corporativa informada, DNS, conectividad Kerberos/LDAP/LDAPS, kinit y sincronización horaria funcionan. Esto no implica que SSO web esté implementado.
 
-La autenticación temporal se limita al entorno de desarrollo.
+El contrato está en `backend/src/auth/authProvider.js`. La autenticación temporal se limita al entorno development. El proveedor Kerberos bloquea el arranque hasta implementar la verificación real: falta recibir FQDN, SPN HTTP y keytab/identidad de servicio, y acordar si SPNEGO termina en Node o en un proxy confiable. Nunca aceptar identidad de cabeceras del navegador sin una frontera de confianza verificada. No se requiere ni se ejecuta realm join en esta etapa. LDAPS queda como alternativa técnica, sin integración implementada.
+
+El contrato HTTP reservado es `authenticateHttp(req, res)`: devuelve `authenticated` con identidad verificada, o `handled` después de terminar una respuesta de negociación/rechazo. En Node permite 401 + `WWW-Authenticate: Negotiate`, recepción de `Authorization: Negotiate ...`, varios intercambios y cabecera final de autenticación mutua. Los tokens no se guardan en la sesión propia ni se registran. En proxy requiere canal/emisor confiable, backend no accesible directamente y eliminación de cabeceras suplantadas por el cliente. No se implementa ni se selecciona ninguna alternativa ahora.
+
+El futuro middleware, entre la carga de sesión y las rutas, usará `establishSession` solo al completar la autenticación. GET de sesión, logout y store no dependen de dónde termine SPNEGO. `/api/sesion/login` existe únicamente en development/development y nunca será un endpoint de usuario/contraseña de AD. Ver el [README del backend](../../backend/README.md) para el contrato del store, la invalidación concurrente y la defensa CSRF de los POST de sesión.

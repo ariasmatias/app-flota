@@ -12,7 +12,7 @@
 | GitHub público | Confirmada | Preferencia del responsable |
 | main, develop y feature/* | Adoptada | Organización del trabajo |
 | Integraciones desacopladas y datos ficticios | Adoptada | Desarrollar sin servidor corporativo |
-| Autenticación corporativa | Pendiente de Infraestructura | Mecanismo permitido aún desconocido |
+| Autenticación corporativa | Kerberos/SPNEGO seleccionado; conectividad validada | Integración web real pendiente de FQDN + SPN HTTP + keytab/identidad de servicio provistos por Infraestructura. Terminación SPNEGO por acordar. LDAPS queda como alternativa técnica; SSO web aún no implementado |
 | Docker | Diferida | No bloquea el desarrollo |
 | Sistema operativo y despliegue | Pendiente de Infraestructura | Servidor sin entregar |
 | Licencia open source | Sin incorporar | No definida |

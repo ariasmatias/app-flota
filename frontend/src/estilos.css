@@ -28,6 +28,9 @@
   --sombra: 0 8px 32px rgba(2, 69, 96, 0.1);
   --opacidad-manchas: 0.55;
 
+  --superficie: #ffffff;      /* paneles sólidos: listas desplegables */
+  --resaltado: #024560;       /* opción bajo el mouse: petróleo de marca */
+
   --radio: 24px;
   --radio-chico: 16px;
 
@@ -47,6 +50,8 @@ body.dark {
   --vidrio-borde: rgba(255, 255, 255, 0.14);
   --sombra: 0 8px 32px rgba(0, 0, 0, 0.4);
   --opacidad-manchas: 0.3;
+  --superficie: #10222d;
+  --resaltado: #00759a;
 }
 
 * { box-sizing: border-box; }
@@ -60,6 +65,10 @@ body {
 h1, h2, h3, p { margin: 0; }
 a { color: inherit; }
 button, input, select { font: inherit; color: inherit; }
+/* Lista del <select> nativo en modo oscuro: el navegador la pinta blanca y el
+   texto heredado (claro) no se leía. Queda para los <select> que todavía no
+   pasaron al componente Desplegable. */
+body.dark select option { background-color: var(--superficie); color: var(--texto); }
 :focus-visible { outline: 2px solid var(--aubasa); outline-offset: 2px; }
 
 /* ───────────── Vidrio (base reutilizable) ───────────── */
@@ -248,7 +257,54 @@ body.dark .aviso { color: #f0c060; }
   .grilla { grid-template-columns: 1fr; }
 }
 
+/* ───────────── Desplegable (core/componentes/Desplegable.jsx) ───────────── */
+.desplegable-campo { display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; min-width: 0; }
+.desplegable-etiqueta span { color: var(--rojo); }
+.desplegable-contenedor { position: relative; }
+.desplegable {
+  width: 100%; min-height: 42px; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 10px 12px; border-radius: 10px; cursor: pointer; text-align: left;
+  font-size: 14px; font-weight: 600; color: var(--texto);
+  background: var(--vidrio); border: 1px solid color-mix(in srgb, var(--texto-2) 35%, transparent);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+.desplegable:hover:not(:disabled) { background: var(--vidrio-hover); }
+.desplegable.abierto, .desplegable:focus-visible { outline: none; border-color: var(--aubasa); box-shadow: 0 0 0 3px color-mix(in srgb, var(--aubasa) 22%, transparent); }
+.desplegable.invalido { border-color: var(--rojo); box-shadow: 0 0 0 3px color-mix(in srgb, var(--rojo) 18%, transparent); }
+.desplegable:disabled { opacity: 0.6; cursor: not-allowed; }
+.desplegable-placeholder { color: var(--texto-2); font-weight: 500; }
+.desplegable small, .desplegable-opcion small { color: var(--texto-2); font-weight: 500; }
+.desplegable-flecha { flex: none; color: var(--texto-2); transition: transform 0.2s ease; }
+.desplegable.abierto .desplegable-flecha { transform: rotate(180deg); }
+.desplegable-oculto { position: absolute; left: 12px; bottom: 0; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+
+.desplegable-panel {
+  position: fixed; z-index: 2000; display: flex; flex-direction: column; overflow: hidden;
+  background: var(--superficie); color: var(--texto);
+  border: 1px solid color-mix(in srgb, var(--texto-2) 30%, transparent); border-radius: 14px;
+  box-shadow: 0 14px 40px rgba(2, 30, 45, 0.25);
+  font-family: 'Encode Sans', Verdana, sans-serif; animation: desplegable-entra 0.12s ease-out;
+}
+@keyframes desplegable-entra { from { opacity: 0; transform: translateY(-4px); } }
+.desplegable-panel ul { list-style: none; margin: 0; padding: 6px; overflow-y: auto; }
+.desplegable-opcion {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 10px 12px; border-radius: 9px; cursor: pointer; font-size: 14px;
+}
+.desplegable-opcion.elegida { color: var(--aubasa-oscuro); font-weight: 700; background: color-mix(in srgb, var(--aubasa) 12%, transparent); }
+body.dark .desplegable-opcion.elegida { color: var(--aubasa-suave); }
+.desplegable-opcion.resaltada, body.dark .desplegable-opcion.resaltada { background: var(--resaltado); color: #fff; }
+.desplegable-opcion.resaltada small { color: rgba(255, 255, 255, 0.8); }
+.desplegable-opcion.deshabilitada { opacity: 0.45; cursor: not-allowed; }
+.desplegable-grupo { padding: 10px 12px 4px; font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--texto-2); }
+.desplegable-vacio { padding: 12px; color: var(--texto-2); font-size: 13px; }
+.desplegable-buscar { display: flex; align-items: center; gap: 8px; margin: 8px 8px 2px; padding: 8px 10px; border-radius: 9px; color: var(--texto-2); border: 1px solid color-mix(in srgb, var(--texto-2) 30%, transparent); }
+.desplegable-buscar input { border: 0; outline: 0; background: transparent; width: 100%; font-size: 14px; color: var(--texto); }
+.desplegable-limpiar { display: flex; align-items: center; gap: 6px; margin: 6px 6px 0; padding: 8px 12px; border: 0; border-radius: 9px; background: transparent; color: var(--rojo); font-size: 13px; font-weight: 700; cursor: pointer; text-align: left; }
+.desplegable-limpiar:hover { background: color-mix(in srgb, var(--rojo) 10%, transparent); }
+body.dark .desplegable-limpiar { color: #ff8a80; }
+
 /* Accesibilidad: sin animaciones si el usuario lo pidió en su sistema */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { transition: none !important; }
+  *, *::before, *::after { transition: none !important; animation: none !important; }
 }

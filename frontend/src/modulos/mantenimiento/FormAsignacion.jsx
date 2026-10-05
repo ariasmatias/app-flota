@@ -3,6 +3,7 @@ import { CircleCheck, CircleX } from 'lucide-react'
 import { hoy, validarAsignacion, estadoVehiculoEn } from './dominio'
 import { guardarAsignacion } from './servicioDemo'
 import { MensajeError, intentar } from './ui'
+import Desplegable from '../../core/componentes/Desplegable'
 
 // M-06: asignar un conductor a un vehículo. Los controles se ven en vivo antes de guardar.
 export default function FormAsignacion({ datos, usuario, hecho, vehiculoFijo = null }) {
@@ -26,20 +27,29 @@ export default function FormAsignacion({ datos, usuario, hecho, vehiculoFijo = n
       <h3>Asignar conductor</h3>
       <p className="mant-muted">Un vehículo puede tener varios conductores y un conductor varios vehículos.</p>
       <div className="mant-form-grid">
-        <label>Conductor
-          <select required value={personaId} onChange={(e) => setPersonaId(e.target.value)}>
-            <option value="">Seleccionar persona</option>
-            {datos.personas.map((p) => <option key={p.id} value={p.id}>{p.apellido_nombre} · {p.legajo}</option>)}
-          </select>
-        </label>
-        <label>Vehículo
-          <select required value={vehiculoId} disabled={Boolean(vehiculoFijo)} onChange={(e) => setVehiculoId(e.target.value)}>
-            <option value="">Seleccionar vehículo</option>
-            {datos.vehiculos.map((v) => (
-              <option key={v.id} value={v.id}>{v.dominio} · {v.marca} {v.modelo}{estadoVehiculoEn(datos, v.id) === 'baja' ? ' (baja)' : ''}</option>
-            ))}
-          </select>
-        </label>
+        <Desplegable
+          etiqueta="Conductor"
+          required
+          buscable
+          placeholder="Seleccionar persona"
+          valor={personaId}
+          alCambiar={setPersonaId}
+          opciones={datos.personas.map((p) => ({ valor: p.id, etiqueta: p.apellido_nombre, detalle: `· ${p.legajo}` }))}
+        />
+        <Desplegable
+          etiqueta="Vehículo"
+          required
+          buscable
+          placeholder="Seleccionar vehículo"
+          valor={vehiculoId}
+          alCambiar={setVehiculoId}
+          deshabilitado={Boolean(vehiculoFijo)}
+          opciones={datos.vehiculos.map((v) => ({
+            valor: v.id,
+            etiqueta: `${v.dominio} · ${v.marca} ${v.modelo}`,
+            detalle: estadoVehiculoEn(datos, v.id) === 'baja' ? '(baja)' : undefined,
+          }))}
+        />
         <label>Desde<input required type="date" max={hoy()} value={desde} onChange={(e) => setDesde(e.target.value)} /></label>
         <label>Motivo<input maxLength={300} value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder="Opcional" /></label>
       </div>

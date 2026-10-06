@@ -30,6 +30,7 @@ En **Ver como**, elegir **Ana Gómez (Mantenimiento)** o **Admin Sistemas** y ab
 
 Para probar:
 - Ficha de AA001ZZ y fecha de hace más de un año: otra póliza, otro centro de costo y sin conductores.
+- Los 20 vehículos y 20 personas del seed: los casos de prueba están listados en `database/seed/README.md`.
 - Asignar Benítez a AA003ZZ: falla la categoría (la Daily pide C.1).
 - Asignar Estévez a cualquier vehículo: falla la autorización hasta aprobarla en la pestaña Autorizaciones; después se habilita.
 - Asignación de Costa en AA002ZZ: marcada en rojo (licencia vencida y autorización pendiente).
@@ -40,7 +41,7 @@ Para probar:
 ## Límites y próxima integración
 
 - Interfaz de demostración, no módulo productivo. Datos ficticios y en memoria: al recargar o salir se reinician.
-- Personas, licencias y autorizaciones copian los ids y legajos de la demo de RRHH para que ambos módulos cuenten la misma historia. **Propuesta:** mover los datos de prueba compartidos (personas, vehículos, asignaciones) a `core/` y que cada módulo los importe; hoy los vehículos de la demo de RRHH (`DEMO-01`, `DEMO-02`) no coinciden con los de Mantenimiento.
+- **Datos de prueba:** salen del seed compartido `database/seed/001_datos_demo.sql`, igual que RRHH (ver `docs/rrhh-seed-compartido.md`). `datosSeed.js` adapta las tablas que usa Mantenimiento con el lector de RRHH (`leerTabla`), que solo lee INSERT VALUES estáticos y no ejecuta SQL. Las pruebas leen el mismo archivo. **Propuesta:** mover el lector a `core/`, porque hoy Mantenimiento lo importa desde la carpeta de RRHH.
 - Las fechas `hoy`, `vigenteEn` y `diasHasta` están duplicadas en RRHH y Mantenimiento con el mismo criterio. **Propuesta:** llevarlas a `core/` en un PR acordado.
 - Períodos `[vigente_desde, vigente_hasta)` como en RRHH. En `poliza` y `vtv`, `vigente_hasta` es el vencimiento del documento y se toma como último día cubierto.
 - La auditoría en memoria es solo apoyo de la demo; la real (`auditoria_evento`, en la misma transacción) la escribe el backend.

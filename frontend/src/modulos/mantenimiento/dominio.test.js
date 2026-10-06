@@ -6,7 +6,12 @@ import {
   retirarVehiculoDePoliza, agregarVehiculoAPoliza, polizaDeVehiculoEn, revisarAutorizacion, fichaVehiculoEn,
   estadoVencimiento,
 } from './dominio.js'
-import { datosIniciales } from './servicioDemo.js'
+import { readFileSync } from 'node:fs'
+import { datosDesdeSeed } from './datosSeed.js'
+
+// Mismos datos que la pantalla: el seed compartido (servicioDemo lo importa con Vite).
+const seed = readFileSync(new URL('../../../../database/seed/001_datos_demo.sql', import.meta.url), 'utf8')
+const datosIniciales = () => datosDesdeSeed(seed)
 
 const d = (dias) => sumarDias(hoy(), dias)
 const usuario = { id: 1, usuario: 'agomez' }
@@ -75,13 +80,13 @@ test('detecta asignaciones vigentes con problemas sobrevinientes', () => {
 test('póliza con varios vehículos: retirar conserva el período y renovar cierra la anterior', () => {
   const datos = datosIniciales()
   assert.throws(() => crearPoliza(datos, { nro_poliza: 'X', aseguradora: 'Y', vigente_desde: hoy(), vigente_hasta: d(365), vehiculos: [] }), /al menos un vehículo/)
-  const retirado = retirarVehiculoDePoliza(datos, 6, hoy())
-  assert.equal(retirado.polizasVehiculo.find((pv) => pv.id === 6).vigente_hasta, hoy())
+  const retirado = retirarVehiculoDePoliza(datos, 7, hoy())
+  assert.equal(retirado.polizasVehiculo.find((pv) => pv.id === 7).vigente_hasta, hoy())
   assert.equal(polizaDeVehiculoEn(retirado, 4, d(-1)).id, 2)
   assert.equal(polizaDeVehiculoEn(retirado, 4, hoy()), null)
   assert.throws(() => agregarVehiculoAPoliza(datos, 2, 1, hoy()), /ya está cubierto/)
 
-  const renovada = renovarPoliza(datos, 2, { nro_poliza: 'POL-DEMO-0003', aseguradora: 'Aseguradora Ejemplo', vigente_desde: hoy(), vigente_hasta: d(365) })
+  const renovada = renovarPoliza(datos, 2, { nro_poliza: 'POL-DEMO-0005', aseguradora: 'Aseguradora Ejemplo', vigente_desde: hoy(), vigente_hasta: d(365) })
   const nueva = renovada.polizas.at(-1)
   assert.equal(polizaDeVehiculoEn(renovada, 1, hoy()).id, nueva.id)
   assert.equal(polizaDeVehiculoEn(renovada, 1, d(-1)).id, 2)
@@ -100,11 +105,27 @@ test('la ficha del vehículo muestra lo vigente en la fecha elegida', () => {
   const datos = datosIniciales()
   const actual = fichaVehiculoEn(datos, 1, hoy())
   assert.equal(actual.conductores.length, 2)
-  assert.equal(actual.centroCosto.nombre, 'Administración · ejemplo')
+  assert.equal(actual.centroCosto.nombre, 'Administración (ejemplo)')
   const pasado = fichaVehiculoEn(datos, 1, d(-400))
   assert.equal(pasado.conductores.length, 0)
   assert.equal(pasado.poliza.nro_poliza, 'POL-DEMO-0001')
-  assert.equal(pasado.centroCosto.nombre, 'Operaciones · ejemplo')
+  assert.equal(pasado.centroCosto.nombre, 'Operaciones (ejemplo)')
   assert.equal(estadoVencimiento(d(12)), 'Por vencer')
   assert.equal(estadoVencimiento(d(-1)), 'Vencida')
+})
+
+test('la demo usa el seed compartido: mismos datos que RRHH y la base', () => {
+  const datos = datosIniciales()
+  assert.equal(datos.personas.length, 20)
+  assert.equal(datos.vehiculos.length, 20)
+  assert.equal(datos.vehiculos[0].dominio, 'AA001ZZ')
+  assert.equal(datos.categorias.find((c) => c.id === datos.vehiculos[2].categoria_requerida_id).codigo, 'C.1')
+  // Caso de prueba del seed: la única asignación vigente con problemas es Costa en AA002ZZ.
+  const conProblemas = datos.asignaciones.filter((a) => !a.vigente_hasta && problemasDeAsignacion(datos, a, hoy()).length)
+  assert.deepEqual(conProblemas.map((a) => a.id), [3])
+  assert.equal(estadoVehiculoEn(datos, 4), 'taller')
+  assert.equal(estadoVehiculoEn(datos, 5), 'baja')
+  assert.equal(polizaDeVehiculoEn(datos, 20, hoy()), null)
+  assert.equal(datos.autorizaciones.filter((a) => a.revision === 'pendiente').length, 3)
+  assert.equal(datos.autorizaciones.find((a) => a.id === 1).documento, 'autorizacion-acosta.pdf')
 })

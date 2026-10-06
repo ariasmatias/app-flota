@@ -3,6 +3,7 @@ import { Plus } from 'lucide-react'
 import { hoy, sumarDias, estadoVencimiento, estadoVehiculoEn } from './dominio'
 import { guardarPoliza, guardarRenovacion, guardarIncorporacion, guardarRetiro } from './servicioDemo'
 import { Etiqueta, Panel, MensajeError, intentar, fecha, dominio } from './ui'
+import Desplegable from '../../core/componentes/Desplegable'
 
 // M-03: una póliza cubre varios vehículos; agregar o retirar conserva el período; renovar cierra la anterior.
 export default function Polizas({ datos, usuario, actualizar }) {
@@ -120,12 +121,13 @@ function Detalle({ datos, id, usuario, actualizar }) {
         ))}
         {vigente && candidatos.length > 0 && (
           <div className="mant-filtros">
-            <label>Agregar vehículo
-              <select value={agregar} onChange={(e) => setAgregar(e.target.value)}>
-                <option value="">Seleccionar</option>
-                {candidatos.map((v) => <option key={v.id} value={v.id}>{v.dominio}</option>)}
-              </select>
-            </label>
+            <Desplegable
+              etiqueta="Agregar vehículo"
+              ancho={280}
+              valor={agregar}
+              alCambiar={setAgregar}
+              opciones={candidatos.map((v) => ({ valor: v.id, etiqueta: v.dominio, detalle: `· ${v.marca} ${v.modelo}` }))}
+            />
             <button className="mant-boton" disabled={!agregar} onClick={() => intentar(() => { actualizar(guardarIncorporacion(datos, id, Number(agregar), hoy(), usuario), 'Vehículo agregado a la póliza.'); setAgregar('') }, setError)}>Agregar desde hoy</button>
           </div>
         )}

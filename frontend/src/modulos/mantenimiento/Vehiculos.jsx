@@ -4,6 +4,10 @@ import { hoy, estadoVehiculoEn, estadoVencimiento, vtvDeVehiculoEn, polizaDeVehi
 import { guardarVehiculo, guardarCorreccion, guardarEstado } from './servicioDemo'
 import { Etiqueta, Panel, MensajeError, intentar, fecha, persona, categoria } from './ui'
 import FormAsignacion from './FormAsignacion'
+import Desplegable from '../../core/componentes/Desplegable'
+
+const capital = (t) => t.charAt(0).toUpperCase() + t.slice(1)
+const opcionesCategoria = (datos) => [{ valor: '', etiqueta: 'Sin exigencia' }, ...datos.categorias.map((c) => ({ valor: c.id, etiqueta: c.codigo }))]
 
 // M-01 / M-02 / M-09: listado, alta, corrección, estado y ficha por fecha.
 export default function Vehiculos({ datos, usuario, actualizar, seleccion, setSeleccion }) {
@@ -34,12 +38,13 @@ export default function Vehiculos({ datos, usuario, actualizar, seleccion, setSe
             <Search size={18} />
             <input aria-label="Buscar vehículo" placeholder="Dominio, marca o modelo" value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
           </label>
-          <label>Estado
-            <select value={filtro} onChange={(e) => setFiltro(e.target.value)}>
-              <option value="todos">Todos</option>
-              {ESTADOS_VEHICULO.map((e) => <option key={e}>{e}</option>)}
-            </select>
-          </label>
+          <Desplegable
+            etiqueta="Estado"
+            ancho={180}
+            valor={filtro}
+            alCambiar={setFiltro}
+            opciones={[{ valor: 'todos', etiqueta: 'Todos' }, ...ESTADOS_VEHICULO.map((e) => ({ valor: e, etiqueta: capital(e) }))]}
+          />
         </div>
         <div className="mant-scroll">
           <table>
@@ -93,12 +98,7 @@ function FormAlta({ datos, usuario, cerrar, actualizar }) {
         <label>Fecha de alta<input required type="date" name="desde" defaultValue={hoy()} max={hoy()} /></label>
         <label>Marca<input required name="marca" maxLength={60} /></label>
         <label>Modelo<input required name="modelo" maxLength={60} /></label>
-        <label>Categoría de licencia requerida
-          <select name="categoria" defaultValue="">
-            <option value="">Sin exigencia</option>
-            {datos.categorias.map((c) => <option key={c.id} value={c.id}>{c.codigo}</option>)}
-          </select>
-        </label>
+        <Desplegable etiqueta="Categoría de licencia requerida" name="categoria" valorInicial="" opciones={opcionesCategoria(datos)} buscable />
       </div>
       <MensajeError texto={error} />
       <div className="mant-acciones">
@@ -183,11 +183,13 @@ function FormEstado({ datos, id, usuario, hecho }) {
       <h3>Cambiar estado</h3>
       <p className="mant-muted">Estado actual: {actual}. Se cierra el período actual y se abre uno nuevo; la baja no borra el vehículo.</p>
       <div className="mant-form-grid">
-        <label>Nuevo estado
-          <select name="estado" defaultValue={ESTADOS_VEHICULO.find((e) => e !== actual)}>
-            {ESTADOS_VEHICULO.filter((e) => e !== actual).map((e) => <option key={e}>{e}</option>)}
-          </select>
-        </label>
+        <Desplegable
+          etiqueta="Nuevo estado"
+          name="estado"
+          required
+          valorInicial={ESTADOS_VEHICULO.find((e) => e !== actual)}
+          opciones={ESTADOS_VEHICULO.filter((e) => e !== actual).map((e) => ({ valor: e, etiqueta: capital(e) }))}
+        />
         <label>Desde<input required type="date" name="desde" defaultValue={hoy()} max={hoy()} /></label>
         <label className="ancho">Motivo<input name="motivo" maxLength={300} placeholder="Obligatorio para taller y baja" /></label>
       </div>
@@ -213,12 +215,7 @@ function FormCorreccion({ datos, vehiculo, usuario, hecho }) {
       <p className="mant-muted">Para errores de carga. Corregir el dominio no rompe asignaciones, pólizas ni multas: todas apuntan al id interno.</p>
       <div className="mant-form-grid">
         <label>Dominio<input required name="dominio" defaultValue={vehiculo.dominio} maxLength={12} /></label>
-        <label>Categoría requerida
-          <select name="categoria" defaultValue={vehiculo.categoria_requerida_id ?? ''}>
-            <option value="">Sin exigencia</option>
-            {datos.categorias.map((c) => <option key={c.id} value={c.id}>{c.codigo}</option>)}
-          </select>
-        </label>
+        <Desplegable etiqueta="Categoría requerida" name="categoria" valorInicial={vehiculo.categoria_requerida_id ?? ''} opciones={opcionesCategoria(datos)} buscable />
         <label>Marca<input required name="marca" defaultValue={vehiculo.marca} maxLength={60} /></label>
         <label>Modelo<input required name="modelo" defaultValue={vehiculo.modelo} maxLength={60} /></label>
       </div>

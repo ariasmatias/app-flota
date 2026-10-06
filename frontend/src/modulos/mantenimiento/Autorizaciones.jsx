@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { guardarRevision } from './servicioDemo'
 import { Etiqueta, Panel, MensajeError, intentar, fecha, persona } from './ui'
+import Desplegable from '../../core/componentes/Desplegable'
 
 // M-08: Legales da de alta la autorización (L-02); Mantenimiento la revisa.
 // El resultado lo ve RRHH en la ficha de la persona, en solo lectura.
@@ -57,13 +58,16 @@ function FormRevision({ datos, id, usuario, hecho }) {
     <form className="vidrio mant-panel mant-form" onSubmit={enviar}>
       <h3>Revisar autorización · {persona(datos, a.persona_id)}</h3>
       <div className="mant-form-grid">
-        <label>Resultado
-          <select value={revision} onChange={(e) => setRevision(e.target.value)}>
-            <option value="si">Sí, puede conducir</option>
-            <option value="no">No</option>
-            <option value="pendiente">Sigue pendiente</option>
-          </select>
-        </label>
+        <Desplegable
+          etiqueta="Resultado"
+          valor={revision}
+          alCambiar={setRevision}
+          opciones={[
+            { valor: 'si', etiqueta: 'Sí, puede conducir' },
+            { valor: 'no', etiqueta: 'No' },
+            { valor: 'pendiente', etiqueta: 'Sigue pendiente' },
+          ]}
+        />
         <label>Observación<input name="observacion" maxLength={500} placeholder={revision === 'no' ? 'Obligatoria si se rechaza' : 'Opcional'} /></label>
       </div>
       <MensajeError texto={error} />

@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import {
   hoy, sumarDias, normalizarDominio, altaVehiculo, corregirVehiculo, cambiarEstadoVehiculo, estadoVehiculoEn,
-  validarAsignacion, asignar, cerrarAsignacion, problemasDeAsignacion, crearPoliza, renovarPoliza,
+  validarAsignacion, asignar, asignarVarios, cerrarAsignacion, problemasDeAsignacion, crearPoliza, renovarPoliza,
   retirarVehiculoDePoliza, agregarVehiculoAPoliza, polizaDeVehiculoEn, revisarAutorizacion, fichaVehiculoEn,
   estadoVencimiento,
 } from './dominio.js'
@@ -128,4 +128,19 @@ test('la demo usa el seed compartido: mismos datos que RRHH y la base', () => {
   assert.equal(polizaDeVehiculoEn(datos, 20, hoy()), null)
   assert.equal(datos.autorizaciones.filter((a) => a.revision === 'pendiente').length, 3)
   assert.equal(datos.autorizaciones.find((a) => a.id === 1).documento, 'autorizacion-acosta.pdf')
+})
+
+test('una persona puede recibir varios vehículos de una vez (todo o nada)', () => {
+  const datos = datosIniciales()
+  // Benítez (2) maneja AA001ZZ y AA006ZZ; le sumamos AB004ZZ (4) y AA008ZZ (8).
+  const r = asignarVarios(datos, { persona_id: 2, vehiculo_ids: ['4', '8'], vigente_desde: hoy() })
+  const suyas = r.asignaciones.filter((a) => a.persona_id === 2 && !a.vigente_hasta).map((a) => a.vehiculo_id).sort((a, b) => a - b)
+  assert.deepEqual(suyas, [1, 4, 6, 8])
+  // Si uno falla (AA003ZZ pide C.1 y Benítez tiene B.1), no se guarda ninguno.
+  assert.throws(() => asignarVarios(datos, { persona_id: 2, vehiculo_ids: [4, 3], vigente_desde: hoy() }), /AA003ZZ: .*categoría C\.1/)
+  assert.throws(() => asignarVarios(datos, { persona_id: 2, vehiculo_ids: [], vigente_desde: hoy() }), /al menos un vehículo/)
+  // Repetir un vehículo que ya tiene: el control lo explica en criollo.
+  const repetido = validarAsignacion(datos, { persona_id: 2, vehiculo_id: 1, vigente_desde: hoy() }).find((c) => c.id === 'superposicion')
+  assert.equal(repetido.ok, false)
+  assert.match(repetido.texto, /Ya tiene este vehículo asignado desde el/)
 })

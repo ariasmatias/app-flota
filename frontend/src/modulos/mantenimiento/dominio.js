@@ -154,7 +154,8 @@ export function validarAsignacion(datos, { persona_id, vehiculo_id, vigente_desd
   const estadoPersona = datos.estadosPersona.find((e) => e.persona_id === persona_id && vigenteEn(e, fecha))?.estado
   const estadoAuto = vehiculo ? estadoVehiculoEn(datos, vehiculo.id, fecha) : null
   const categoria = datos.categorias.find((c) => c.id === vehiculo?.categoria_requerida_id)?.codigo
-  const superpuesta = datos.asignaciones.some(
+  // Evita cargar dos veces la misma persona en el mismo vehículo con fechas que se pisan.
+  const repetida = datos.asignaciones.find(
     (a) => a.persona_id === persona_id && a.vehiculo_id === vehiculo_id && (!a.vigente_hasta || a.vigente_hasta > fecha),
   )
 
@@ -173,7 +174,13 @@ export function validarAsignacion(datos, { persona_id, vehiculo_id, vigente_desd
       texto: categoria ? `La licencia incluye la categoría ${categoria}` : 'El vehículo no exige categoría',
     },
     { id: 'autorizacion', ok: autorizacion?.revision === 'si', texto: 'Autorización para conducir en "sí"' },
-    { id: 'superposicion', ok: !superpuesta, texto: 'Sin otra asignación del mismo par en ese período' },
+    {
+      id: 'superposicion',
+      ok: !repetida,
+      texto: repetida
+        ? `Ya tiene este vehículo asignado desde el ${repetida.vigente_desde.split('-').reverse().join('/')}`
+        : 'No tiene ya este vehículo asignado en esas fechas',
+    },
   ]
 }
 
@@ -194,6 +201,21 @@ export function asignar(datos, nueva) {
 
 // Problemas de una asignación YA vigente (por ejemplo, la licencia venció después
 // de asignar). No la cierra sola: Mantenimiento decide.
+// Asigna VARIOS vehículos a una misma persona de una vez. Todo o nada: si
+// alguno no cumple las reglas, no se guarda ninguno (y se dice cuál falla).
+export function asignarVarios(datos, { persona_id, vehiculo_ids, vigente_desde, motivo }) {
+  const ids = [...new Set((vehiculo_ids ?? []).map(Number))]
+  if (!ids.length) throw new Error('Elegí al menos un vehículo.')
+  return ids.reduce((acc, vehiculo_id) => {
+    try {
+      return asignar(acc, { persona_id, vehiculo_id, vigente_desde, motivo })
+    } catch (e) {
+      const dom = datos.vehiculos.find((v) => v.id === vehiculo_id)?.dominio ?? vehiculo_id
+      throw new Error(`${dom}: ${e.message}`)
+    }
+  }, datos)
+}
+
 export function problemasDeAsignacion(datos, asignacion, fecha = hoy()) {
   const licencia = datos.licencias.find((l) => l.persona_id === asignacion.persona_id && vigenteEn(l, fecha))
   const autorizacion = datos.autorizaciones.find((a) => a.persona_id === asignacion.persona_id && vigenteEn(a, fecha))

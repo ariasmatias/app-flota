@@ -62,7 +62,7 @@ body.dark .mant-enlace { color: var(--aubasa-suave); }
 .mant-boton:disabled { opacity: .45; cursor: not-allowed; }
 .mant-boton.secundario { background: var(--vidrio); color: var(--texto); border: 1px solid var(--vidrio-borde); }
 .mant-boton.secundario:hover { background: var(--vidrio-hover); }
-.mant-acciones { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+.mant-acciones { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 14px; }
 
 .mant-form { gap: 14px; }
 .mant-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
@@ -73,6 +73,9 @@ body.dark .mant-enlace { color: var(--aubasa-suave); }
 .mant-checks { display: flex; flex-wrap: wrap; gap: 10px 22px; font-size: 13px; }
 .mant-checks label { display: flex; align-items: center; gap: 6px; font-family: ui-monospace, Consolas, monospace; font-weight: 700; }
 
+.mant-controles-grupo { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.mant-controles-grupo h4 { margin: 0 0 6px; font-size: 13px; display: flex; gap: 8px; align-items: center; }
+.mant-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .mant-controles { list-style: none; padding: 12px 14px; margin: 0; border-radius: 12px; background: color-mix(in srgb, var(--texto) 4%, transparent); display: grid; gap: 6px; font-size: 13px; }
 .mant-controles li { display: flex; gap: 8px; align-items: center; }
 .mant-controles .ok svg { color: var(--verde); }

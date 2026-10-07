@@ -1,11 +1,11 @@
 import { hoy } from './dominio.js'
-import { leerTabla } from '../rrhh/leerSeed.js'
+import { leerTabla } from '../../core/datos/seed.js'
 
 // Arma los datos de la demo de Mantenimiento a partir del seed compartido
 // (database/seed/001_datos_demo.sql), el mismo que se carga en PostgreSQL y
 // que ya usa RRHH. Así los dos módulos muestran las mismas personas,
-// vehículos y fechas. Usa el lector de RRHH (leerTabla): solo lee INSERT
-// VALUES estáticos, no ejecuta SQL. Propuesta: mover el lector a core/.
+// vehículos y fechas. Usa el lector compartido core/datos/seed.js: solo lee
+// INSERT VALUES estáticos, no ejecuta SQL.
 export function datosDesdeSeed(sql, referencia = hoy()) {
   const tabla = (nombre) => leerTabla(sql, nombre, referencia)
   const categorias = tabla('categoria_licencia')

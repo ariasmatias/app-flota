@@ -20,6 +20,9 @@ import { Check, ChevronDown, Search, X } from 'lucide-react'
  *   `required` el navegador no deja enviar sin elegir (y se marca en rojo).
  * - Controlado (`valor` + `alCambiar`) o no controlado (`valorInicial`).
  *
+ * - `multiple`: se eligen varias opciones (valor = array); la lista queda
+ *   abierta para seguir marcando y el campo muestra las elegidas.
+ *
  * opciones: [{ valor, etiqueta, detalle?, deshabilitada? }] o
  *           { separador: true, etiqueta } para títulos de grupo.
  */
@@ -37,10 +40,14 @@ export default function Desplegable({
   limpiable = false,
   className = '',
   ancho,
+  multiple = false,
 }) {
   const controlado = valor !== undefined
-  const [interno, setInterno] = useState(String(valorInicial ?? ''))
-  const actual = String(controlado ? valor ?? '' : interno)
+  const normalizar = (v) => (multiple ? (Array.isArray(v) ? v.map(String) : []) : String(v ?? ''))
+  const [interno, setInterno] = useState(() => normalizar(valorInicial))
+  const actual = normalizar(controlado ? valor : interno)
+  const marcados = multiple ? actual : actual ? [actual] : []
+  const estaElegida = (o) => marcados.includes(String(o.valor))
 
   const [abierto, setAbierto] = useState(false)
   const [busqueda, setBusqueda] = useState('')
@@ -52,7 +59,8 @@ export default function Desplegable({
   const idLista = useId()
   const idEtiqueta = useId()
 
-  const elegida = opciones.find((o) => !o.separador && String(o.valor) === actual)
+  const elegida = multiple ? null : opciones.find((o) => !o.separador && String(o.valor) === actual)
+  const elegidas = opciones.filter((o) => !o.separador && estaElegida(o))
 
   const visibles = useMemo(() => {
     const q = busqueda.trim().toLowerCase()
@@ -82,7 +90,7 @@ export default function Desplegable({
     if (deshabilitado) return
     ubicar()
     setAbierto(true)
-    const i = visibles.findIndex((o) => !o.separador && String(o.valor) === actual)
+    const i = visibles.findIndex((o) => !o.separador && estaElegida(o))
     setResaltado(i >= 0 ? i : visibles.findIndex(elegible))
   }
 
@@ -95,6 +103,14 @@ export default function Desplegable({
   function elegir(o) {
     if (!elegible(o)) return
     const v = String(o.valor)
+    if (multiple) {
+      // Varias: marcar / desmarcar y dejar la lista abierta.
+      const nuevo = marcados.includes(v) ? marcados.filter((x) => x !== v) : [...marcados, v]
+      if (!controlado) setInterno(nuevo)
+      alCambiar?.(nuevo)
+      setInvalido(false)
+      return
+    }
     if (!controlado) setInterno(v)
     alCambiar?.(v)
     setInvalido(false)
@@ -103,8 +119,9 @@ export default function Desplegable({
   }
 
   function limpiar() {
-    if (!controlado) setInterno('')
-    alCambiar?.('')
+    const vacio = multiple ? [] : ''
+    if (!controlado) setInterno(vacio)
+    alCambiar?.(vacio)
     cerrar()
     disparador.current?.focus()
   }
@@ -184,10 +201,18 @@ export default function Desplegable({
           aria-controls={abierto ? idLista : undefined}
           aria-labelledby={etiqueta ? idEtiqueta : undefined}
         >
-          <span className={elegida ? 'desplegable-valor' : 'desplegable-placeholder'}>
-            {elegida ? elegida.etiqueta : placeholder}
-            {elegida?.detalle && <small> {elegida.detalle}</small>}
-          </span>
+          {multiple ? (
+            <span className={elegidas.length ? 'desplegable-valor' : 'desplegable-placeholder'}>
+              {elegidas.length === 0 && placeholder}
+              {elegidas.length > 0 && elegidas.length <= 3 && elegidas.map((o) => o.etiqueta).join(', ')}
+              {elegidas.length > 3 && `${elegidas.length} elegidos`}
+            </span>
+          ) : (
+            <span className={elegida ? 'desplegable-valor' : 'desplegable-placeholder'}>
+              {elegida ? elegida.etiqueta : placeholder}
+              {elegida?.detalle && <small> {elegida.detalle}</small>}
+            </span>
+          )}
           <ChevronDown size={16} aria-hidden="true" className="desplegable-flecha" />
         </button>
         {/* Campo real del formulario: lleva el valor en FormData y activa la validación "required". */}
@@ -198,7 +223,7 @@ export default function Desplegable({
             aria-hidden="true"
             name={name}
             required={required}
-            value={actual}
+            value={marcados.join(',')}
             onChange={() => {}}
             onInvalid={() => setInvalido(true)}
           />
@@ -217,13 +242,13 @@ export default function Desplegable({
               <input autoFocus placeholder="Buscar…" value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
             </label>
           )}
-          {limpiable && actual && (
+          {limpiable && marcados.length > 0 && (
             <button type="button" className="desplegable-limpiar" onClick={limpiar}><X size={14} /> Limpiar selección</button>
           )}
-          <ul id={idLista} role="listbox" aria-labelledby={etiqueta ? idEtiqueta : undefined}>
+          <ul id={idLista} role="listbox" aria-multiselectable={multiple || undefined} aria-labelledby={etiqueta ? idEtiqueta : undefined}>
             {visibles.map((o, i) => {
               if (o.separador) return <li key={`sep-${i}`} role="presentation" className="desplegable-grupo">{o.etiqueta}</li>
-              const sel = String(o.valor) === actual
+              const sel = estaElegida(o)
               const clasesOpcion = ['desplegable-opcion', sel && 'elegida', i === resaltado && 'resaltada', o.deshabilitada && 'deshabilitada'].filter(Boolean).join(' ')
               return (
                 <li
@@ -237,8 +262,9 @@ export default function Desplegable({
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => elegir(o)}
                 >
-                  <span>{o.etiqueta}{o.detalle && <small> {o.detalle}</small>}</span>
-                  {sel && <Check size={15} aria-hidden="true" />}
+                  {multiple && <span className={`desplegable-casilla${sel ? ' marcada' : ''}`} aria-hidden="true">{sel && <Check size={12} />}</span>}
+                  <span className="desplegable-texto">{o.etiqueta}{o.detalle && <small> {o.detalle}</small>}</span>
+                  {sel && !multiple && <Check size={15} aria-hidden="true" />}
                 </li>
               )
             })}

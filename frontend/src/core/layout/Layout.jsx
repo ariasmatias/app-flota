@@ -62,10 +62,10 @@ export default function Layout() {
               <Search size={16} aria-hidden="true" />
               <input
                 type="search"
-                placeholder="Buscar módulo…"
+                placeholder="Buscar módulo o dominio…"
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
-                aria-label="Buscar módulo"
+                aria-label="Buscar módulo o dominio"
               />
             </label>
           )}

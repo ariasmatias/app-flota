@@ -42,6 +42,13 @@ export function guardarAsignacion(datos, nueva, usuario) {
   return auditar(resultado, usuario, 'alta', 'asignacion', a.id, null, a)
 }
 
+// Varios vehículos para una persona: un evento de auditoría por asignación.
+export function guardarAsignaciones(datos, nueva, usuario) {
+  const resultado = reglas.asignarVarios(datos, nueva)
+  const nuevas = resultado.asignaciones.slice(datos.asignaciones.length)
+  return nuevas.reduce((acc, a) => auditar(acc, usuario, 'alta', 'asignacion', a.id, null, a), resultado)
+}
+
 export function guardarCierreAsignacion(datos, id, cierre, usuario) {
   return auditar(reglas.cerrarAsignacion(datos, id, cierre), usuario, 'anulacion', 'asignacion', id, null, cierre)
 }

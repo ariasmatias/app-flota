@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { vigenteEn, renovarLicencia, gestionarMulta, contextoMulta, hoy, estadoLicencia } from './dominio.js'
+import { vigenteEn, renovarLicencia, gestionarMulta, contextoMulta, hoy, estadoLicencia, gestionesDePersona, esAviso } from './dominio.js'
 import { readFileSync } from 'node:fs'
 import { datosDesdeSeed } from './leerSeed.js'
 const seed = readFileSync(new URL('../../../../database/seed/001_datos_demo.sql', import.meta.url), 'utf8')
@@ -34,4 +34,20 @@ test('multas consultan asignaciones y centro de costo a la fecha de infracción'
 test('la licencia vence después de la fecha indicada, no al inicio de ese día', () => {
   assert.equal(estadoLicencia({ vencimiento: '2026-10-02' }, '2026-10-02'), 'Por vencer')
   assert.equal(estadoLicencia({ vencimiento: '2026-10-01' }, '2026-10-02'), 'Vencida')
+})
+
+test('cada informe de multa lleva estado de gestión y suma avisos a la persona', () => {
+  const datos = datosDesdeSeed(seed)
+  const m = datos.multas.find(x => x.nro_acta === 'ACTA-DEMO-002') // AA002ZZ, responsable Costa (3)
+  const informe = estado => ({ nombre: 'aviso.pdf', hash: 'x', estado_gestion: estado, fecha: hoy(), responsable_id: 3 })
+  assert.throws(() => gestionarMulta(datos, m.id, { documentos: [...m.documentos, { nombre: 'sin-estado.pdf' }] }), /estado de gestión/)
+  let multas = gestionarMulta(datos, m.id, { documentos: [...m.documentos, informe('Primer aviso')] })
+  let d2 = { ...datos, multas }
+  const m2 = multas.find(x => x.id === m.id)
+  multas = gestionarMulta(d2, m.id, { documentos: [...m2.documentos, informe('Descargo del conductor')] })
+  d2 = { ...datos, multas }
+  const gestiones = gestionesDePersona(d2, 3)
+  assert.equal(gestiones.length, 2)
+  assert.equal(gestiones.filter(g => esAviso(g.estado_gestion)).length, 1)
+  assert.equal(gestionesDePersona(d2, 1).length, 0)
 })

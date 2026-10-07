@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Search, Plus } from 'lucide-react'
 import { hoy, estadoVehiculoEn, estadoVencimiento, vtvDeVehiculoEn, polizaDeVehiculoEn, fichaVehiculoEn, ESTADOS_VEHICULO, vigenteEn } from './dominio'
 import { guardarVehiculo, guardarCorreccion, guardarEstado } from './servicioDemo'
@@ -144,6 +145,7 @@ function Ficha({ datos, id, usuario, actualizar, volver }) {
             <button className="mant-boton" onClick={() => abrir('estado')}>Cambiar estado</button>
             <button className="mant-boton secundario" onClick={() => abrir('asignar')}>Asignar conductor</button>
             <button className="mant-boton secundario" onClick={() => abrir('corregir')}>Corregir datos</button>
+            <Link className="mant-enlace" to={`/vehiculo/${v.dominio}`}>Ficha completa con todo el historial →</Link>
           </div>
         )}
       </Panel>

@@ -33,6 +33,20 @@ export function contextoMulta(datos, multa) {
   return { conductores: datos.personas.filter(p => asignaciones.some(a => a.persona_id === p.id)), centro: centro?.nombre ?? 'Sin centro de costo registrado' }
 }
 
+// Estado de gestión: qué responde cada informe que se sube a una multa.
+// Valores PROVISORIOS, a confirmar con RRHH. Los que dicen "aviso" cuentan
+// como aviso dado a la persona responsable.
+export const ESTADOS_GESTION = ['Primer aviso', 'Segundo aviso', 'Aviso final', 'Descargo del conductor', 'Descuento aplicado', 'Gestión cerrada']
+export const esAviso = estado => /aviso/i.test(estado ?? '')
+
+// Todos los informes de multas cargados con una persona como responsable.
+export function gestionesDePersona(datos, personaId) {
+  return datos.multas.flatMap(m => (m.documentos ?? [])
+    .filter(d => d.estado_gestion && (d.responsable_id ?? m.responsable_id) === personaId)
+    .map(d => ({ ...d, multa_id: m.id, nro_acta: m.nro_acta, vehiculo_id: m.vehiculo_id })))
+    .sort((a, b) => (b.fecha ?? '').localeCompare(a.fecha ?? ''))
+}
+
 export function gestionarMulta(datos, id, cambios, fechaActual = hoy()) {
   const multa = datos.multas.find(m => m.id === id)
   if (!multa) throw new Error('Multa inexistente.')
@@ -40,6 +54,8 @@ export function gestionarMulta(datos, id, cambios, fechaActual = hoy()) {
   if (!siguiente.responsable_id || !contextoMulta(datos, multa).conductores.some(p => p.id === siguiente.responsable_id)) throw new Error('Elegí un conductor asignado en la fecha de infracción.')
   if (!['pendiente', 'pagada'].includes(siguiente.estado_pago)) throw new Error('Estado de pago inválido.')
   if (siguiente.estado_pago === 'pagada' && (!siguiente.fecha_pago || siguiente.fecha_pago < multa.fecha_infraccion || siguiente.fecha_pago > fechaActual)) throw new Error('Indicá una fecha de pago entre la infracción y hoy.')
+  const nuevos = (siguiente.documentos ?? []).slice((multa.documentos ?? []).length)
+  if (nuevos.some(d => !ESTADOS_GESTION.includes(d.estado_gestion))) throw new Error('Indicá el estado de gestión del informe que subís.')
   if (siguiente.estado_pago === 'pendiente') siguiente.fecha_pago = null
   return datos.multas.map(m => m.id === id ? siguiente : m)
 }

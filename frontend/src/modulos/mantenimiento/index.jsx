@@ -8,11 +8,13 @@ import Vehiculos from './Vehiculos'
 import Asignaciones from './Asignaciones'
 import Polizas from './Polizas'
 import Autorizaciones from './Autorizaciones'
+import Conductores from './Conductores'
 import './mantenimiento.css'
 
 const SECCIONES = [
   ['vehiculos', 'Vehículos'],
   ['asignaciones', 'Asignaciones'],
+  ['conductores', 'Conductores'],
   ['polizas', 'Pólizas'],
   ['autorizaciones', 'Autorizaciones'],
 ]
@@ -90,6 +92,7 @@ function Demo() {
 
       {vista === 'vehiculos' && <Vehiculos {...props} seleccion={seleccion} setSeleccion={setSeleccion} />}
       {vista === 'asignaciones' && <Asignaciones {...props} />}
+      {vista === 'conductores' && <Conductores {...props} />}
       {vista === 'polizas' && <Polizas {...props} />}
       {vista === 'autorizaciones' && <Autorizaciones {...props} />}
     </section>

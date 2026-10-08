@@ -77,9 +77,12 @@ export default function Desplegable({
     const abajo = window.innerHeight - r.bottom - margen
     const arriba = r.top - margen
     const haciaArriba = abajo < 200 && arriba > abajo
+    // La lista puede ser más ancha que el campo (por ejemplo "Ver como"), sin salirse de la pantalla.
+    const ancho = Math.min(Math.max(r.width, 240), window.innerWidth - margen * 2)
+    const izquierda = Math.max(margen, Math.min(r.left, window.innerWidth - ancho - margen))
     setPos({
-      left: r.left,
-      width: r.width,
+      left: izquierda,
+      width: ancho,
       top: haciaArriba ? undefined : r.bottom + 6,
       bottom: haciaArriba ? window.innerHeight - r.top + 6 : undefined,
       maxHeight: Math.max(140, Math.min(300, haciaArriba ? arriba : abajo)),

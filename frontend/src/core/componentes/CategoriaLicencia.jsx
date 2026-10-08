@@ -172,3 +172,29 @@ export function GuiaCategorias({ texto = '¿Qué es cada categoría?' }) {
     </>
   )
 }
+
+// Casillas de categorías agrupadas por clase, una columna por letra (A, B, C…).
+// `codigos`: las que ofrece el catálogo; `elegidas`/`alCambiar`: las marcadas.
+export function SelectorCategorias({ codigos, elegidas, alCambiar }) {
+  const porClase = CLASES.map((k) => ({ ...k, codigos: codigos.filter((c) => c[0] === k.clase) })).filter((k) => k.codigos.length)
+  const alternar = (c, marcar) => alCambiar(marcar ? [...elegidas, c] : elegidas.filter((x) => x !== c))
+  return (
+    <div className="selector-categorias">
+      {porClase.map((k) => (
+        <fieldset key={k.clase} className="selector-clase" title={`Clase ${k.clase}: ${k.nombre}`}>
+          <legend><span className="selector-letra">{k.clase}</span> {k.corto}</legend>
+          {k.codigos.map((c) => {
+            const info = infoCategoria(c)
+            return (
+              <label key={c} title={`${info.titulo}. ${info.detalle}`} className={elegidas.includes(c) ? 'marcada' : ''}>
+                <input type="checkbox" checked={elegidas.includes(c)} onChange={(e) => alternar(c, e.target.checked)} />
+                <IconoCategoria grupo={info.grupo} size={18} />
+                <b>{c}</b>
+              </label>
+            )
+          })}
+        </fieldset>
+      ))}
+    </div>
+  )
+}

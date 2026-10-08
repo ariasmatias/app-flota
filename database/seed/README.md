@@ -37,6 +37,7 @@ psql -h localhost -U flota_app -d flota -v ON_ERROR_STOP=1 -f database/seed/900_
 | Bajas de personal | Duarte (DEMO-004, hace 20 días) y Suárez (DEMO-018), con asignaciones cerradas |
 | Autorizaciones | Estévez (DEMO-005) y Torres (DEMO-019) pendientes; Juárez (DEMO-010) rechazada |
 | Licencias | Benítez vence en 18 días, Ledesma en 25; Paz (DEMO-015) sin B.1; Torres sin licencia |
+| Categorías | Catálogo con las 22 subclases oficiales. Herrera (DEMO-008) tiene C.1 y E.1 sin B.1 explícita: igual maneja vehículos B.1 porque la normativa la incluye. Paz (DEMO-015) tiene A.2.1 (cuatriciclo) |
 | Vehículos | AB004ZZ y AA015ZZ en taller; AA005ZZ y AA019ZZ de baja; AA020ZZ 0 km sin póliza ni VTV |
 | VTV | Vencidas AA003ZZ y AA013ZZ; por vencer AA002ZZ (12 días) y AA009ZZ (20 días) |
 | Pólizas | POL-DEMO-0002 vence en 25 días; renovación de POL-DEMO-0003 → 0004 |

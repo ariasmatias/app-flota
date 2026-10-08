@@ -1,4 +1,6 @@
 -- Controles de coherencia de los datos de prueba. Solo lee, no modifica nada.
+-- Nota: la categoría se controla EXACTA. Las inclusiones de la normativa (C.1 incluye B.1, etc.)
+-- las aplica la app (core/config/categoriasLicencia.js); un caso así acá puede aparecer como falta.
 -- Uso: psql -h localhost -U flota_app -d flota -f database/seed/910_verificar_datos_demo.sql
 
 \echo '--- Asignaciones vigentes con algún problema (esperado: solo Costa en AA002ZZ)'
@@ -7,7 +9,7 @@ SELECT a.id, p.apellido_nombre, v.dominio,
     CASE WHEN pe.estado <> 'alta' THEN 'persona de baja' END,
     CASE WHEN ve.estado = 'baja' THEN 'vehículo de baja' END,
     CASE WHEN l.id IS NULL THEN 'sin licencia' WHEN l.vencimiento < CURRENT_DATE THEN 'licencia vencida' END,
-    CASE WHEN NOT EXISTS (SELECT 1 FROM licencia_categoria lc WHERE lc.licencia_id = l.id AND lc.categoria_id = v.categoria_requerida_id) THEN 'falta categoría' END,
+    CASE WHEN NOT EXISTS (SELECT 1 FROM licencia_categoria lc WHERE lc.licencia_id = l.id AND lc.categoria_id = v.categoria_requerida_id) THEN 'falta categoría (exacta)' END,
     CASE WHEN au.revision IS DISTINCT FROM 'si' THEN 'autorización ' || coalesce(au.revision,'ninguna') END) AS problemas
 FROM asignacion a
 JOIN persona p ON p.id = a.persona_id JOIN vehiculo v ON v.id = a.vehiculo_id

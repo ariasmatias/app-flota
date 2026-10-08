@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { CircleHelp, X } from 'lucide-react'
-import { CLASES, CATEGORIAS_LICENCIA, infoCategoria } from '../config/categoriasLicencia'
+import { CLASES, CATEGORIAS_LICENCIA, ACOMPANANTES, infoCategoria, incluidasPor, categoriasHabilitadas } from '../config/categoriasLicencia'
 
 // Dibujitos propios (no copiados de ningún sitio), mismo trazo que los
 // íconos de lucide: 24×24, línea de 1.8 y color del texto (sirven en claro y oscuro).
@@ -157,13 +157,18 @@ export function GuiaCategorias({ texto = '¿Qué es cada categoría?' }) {
                       <li key={c.codigo}>
                         <span className="guia-icono"><IconoCategoria grupo={c.grupo} size={26} /></span>
                         <span className="guia-codigo">{c.codigo}</span>
-                        <span className="guia-texto"><b>{c.titulo}</b><small>{c.detalle}{c.edad ? ` Edad mínima: ${c.edad}.` : ''}</small></span>
+                        <span className="guia-texto">
+                          <b>{c.titulo}</b>
+                          <small>{c.detalle}{c.edad ? ` Edad mínima: ${c.edad}.` : ''}</small>
+                          {incluidasPor(c.codigo).length > 0 && <small className="guia-incluye">Incluye: {incluidasPor(c.codigo).join(' · ')}</small>}
+                          {ACOMPANANTES[c.codigo] && <small className="guia-incluye">{ACOMPANANTES[c.codigo]}</small>}
+                        </span>
                       </li>
                     ))}
                   </ul>
                 </section>
               ))}
-              <p className="guia-nota">Fuente: argentina.gob.ar · Seguridad Vial. Los dibujos son orientativos.</p>
+              <p className="guia-nota">Una licencia solo incluye otra categoría cuando la normativa lo dice expresamente; no alcanza con que el vehículo sea más chico. Las categorías profesionales no se habilitan entre sí (por ejemplo, C.3 no habilita colectivos). Fuente: argentina.gob.ar · Seguridad Vial. Los dibujos son orientativos.</p>
             </div>
           </div>
         </div>,
@@ -178,6 +183,7 @@ export function GuiaCategorias({ texto = '¿Qué es cada categoría?' }) {
 export function SelectorCategorias({ codigos, elegidas, alCambiar }) {
   const porClase = CLASES.map((k) => ({ ...k, codigos: codigos.filter((c) => c[0] === k.clase) })).filter((k) => k.codigos.length)
   const alternar = (c, marcar) => alCambiar(marcar ? [...elegidas, c] : elegidas.filter((x) => x !== c))
+  const habilitadas = categoriasHabilitadas(elegidas)
   return (
     <div className="selector-categorias">
       {porClase.map((k) => (
@@ -186,10 +192,11 @@ export function SelectorCategorias({ codigos, elegidas, alCambiar }) {
           {k.codigos.map((c) => {
             const info = infoCategoria(c)
             return (
-              <label key={c} title={`${info.titulo}. ${info.detalle}`} className={elegidas.includes(c) ? 'marcada' : ''}>
+              <label key={c} title={`${info.titulo}. ${info.detalle}`} className={elegidas.includes(c) ? 'marcada' : habilitadas.has(c) ? 'incluida' : ''}>
                 <input type="checkbox" checked={elegidas.includes(c)} onChange={(e) => alternar(c, e.target.checked)} />
                 <IconoCategoria grupo={info.grupo} size={18} />
                 <b>{c}</b>
+                {!elegidas.includes(c) && habilitadas.has(c) && <small>incluida</small>}
               </label>
             )
           })}

@@ -6,6 +6,7 @@ import { useTema } from '../tema/TemaContext'
 import { AREAS } from '../config/areas'
 import { USUARIOS_DE_PRUEBA } from '../sesion/usuariosDePrueba'
 import Logo from '../componentes/Logo'
+import Desplegable from '../componentes/Desplegable'
 
 function iniciales(nombre = '') {
   return nombre
@@ -38,16 +39,13 @@ export default function Layout() {
             <span>
               <strong>Modo desarrollo</strong> · usuario simulado, sin Active Directory
             </span>
-            <label>
-              Ver como
-              <select value={usuario?.id ?? ''} onChange={(e) => verComo(e.target.value)}>
-                {USUARIOS_DE_PRUEBA.map((u) => (
-                  <option key={u.id} value={u.id}>
-                    {u.nombre} · {AREAS[u.area]}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <Desplegable
+              etiqueta="Ver como"
+              ancho="auto"
+              valor={usuario?.id ?? ''}
+              alCambiar={verComo}
+              opciones={USUARIOS_DE_PRUEBA.map((u) => ({ valor: u.id, etiqueta: u.nombre, detalle: `· ${AREAS[u.area]}` }))}
+            />
           </div>
         )}
 

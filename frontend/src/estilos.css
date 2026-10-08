@@ -109,6 +109,10 @@ body.dark .barra-dev { color: #ffe27a; --vidrio: rgba(255, 216, 77, 0.12); --vid
   background: rgba(255, 255, 255, 0.6); color: #3d3200;
 }
 body.dark .barra-dev select { background: rgba(0, 0, 0, 0.3); color: #ffe27a; }
+.barra-dev .desplegable-campo { flex-direction: row; align-items: center; gap: 8px; font-size: 13px; }
+.barra-dev .desplegable { min-height: 32px; padding: 4px 12px; border-radius: 999px; font-size: 13px; border-color: rgba(201, 168, 0, 0.5); background: rgba(255, 255, 255, 0.6); color: #3d3200; }
+body.dark .barra-dev .desplegable { background: rgba(0, 0, 0, 0.3); color: #ffe27a; }
+.barra-dev .desplegable .desplegable-flecha { color: currentColor; }
 
 /* ───────────── Barra superior ───────────── */
 .barra {
@@ -355,6 +359,14 @@ body.dark .icono-categoria { color: var(--aubasa-suave); }
 .chips-categoria { display: inline-flex; flex-wrap: wrap; gap: 6px; vertical-align: middle; }
 .chip-categoria { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px 3px 6px; border-radius: 999px; font-size: 12px; white-space: nowrap; background: color-mix(in srgb, var(--aubasa) 10%, transparent); border: 1px solid color-mix(in srgb, var(--aubasa) 25%, transparent); cursor: help; color: var(--texto); }
 .chip-categoria span { font-weight: 500; color: var(--texto-2); }
+.selector-categorias { display: grid; grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); gap: 10px; align-items: start; }
+.selector-clase { margin: 0; padding: 10px 10px 8px; border-radius: 12px; border: 1px solid color-mix(in srgb, var(--texto-2) 22%, transparent); background: color-mix(in srgb, var(--texto) 3%, transparent); display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.selector-clase legend { padding: 0 6px; font-size: 12px; white-space: nowrap; font-weight: 700; color: var(--texto-2); display: flex; align-items: center; gap: 6px; }
+.selector-letra { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 6px; font-size: 12px; font-weight: 800; color: #fff; background: var(--aubasa-oscuro); }
+.selector-clase label { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 8px; font-size: 13px; cursor: pointer; }
+.selector-clase label:hover { background: color-mix(in srgb, var(--aubasa) 10%, transparent); }
+.selector-clase label.marcada { background: color-mix(in srgb, var(--aubasa) 16%, transparent); }
+.selector-clase input { accent-color: var(--aubasa-oscuro); }
 .guia-categorias-boton { display: inline-flex; align-items: center; gap: 5px; border: 0; background: transparent; padding: 2px 0; cursor: pointer; font-size: 13px; font-weight: 700; color: var(--aubasa-oscuro); }
 body.dark .guia-categorias-boton { color: var(--aubasa-suave); }
 .guia-categorias-boton:hover { text-decoration: underline; }

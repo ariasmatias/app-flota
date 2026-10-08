@@ -19,7 +19,7 @@
 .rrhh-panel h2 { font-size: 22px; margin-bottom: 4px; }
 .rrhh-panel h3 { font-size: 18px; margin-bottom: 8px; }
 .rrhh-panel-titulo { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
-.rrhh-filtros { display: flex; gap: 14px; align-items: center; margin: 20px 0; flex-wrap: wrap; }
+.rrhh-filtros { display: flex; gap: 14px; align-items: flex-end; margin: 20px 0; flex-wrap: wrap; }
 .rrhh input:not([type=checkbox]), .rrhh select { background: var(--vidrio); border: 1px solid color-mix(in srgb, var(--texto-2) 35%, transparent); border-radius: 10px; padding: 10px 12px; max-width: 100%; }
 .rrhh-busqueda { display: flex; gap: 8px; align-items: center; flex: 1; }
 .rrhh-busqueda input { width: 100%; }
@@ -45,8 +45,8 @@ body.dark .rrhh-enlace { color: var(--aubasa-suave); }
 .rrhh-form { display: flex; flex-direction: column; gap: 16px; }
 .rrhh-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 .rrhh-form-grid label, .rrhh-panel-titulo label { display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; }
-.rrhh-form fieldset { border: 1px solid var(--vidrio-borde); border-radius: 12px; padding: 16px; }
-.rrhh-form legend { font-size: 13px; font-weight: 700; }
+.rrhh-form > fieldset { border: 1px solid var(--vidrio-borde); border-radius: 12px; padding: 16px; }
+.rrhh-form > fieldset > legend { font-size: 13px; font-weight: 700; }
 .rrhh-categorias { display: flex; flex-wrap: wrap; gap: 12px 20px; font-size: 13px; }
 .rrhh-categorias label { display: flex; align-items: center; gap: 6px; }
 .rrhh-error { color: var(--rojo); }

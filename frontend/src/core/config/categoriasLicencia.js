@@ -8,13 +8,13 @@
 // Pendiente de definir con Mariano y RRHH qué códigos traen las licencias reales.
 
 export const CLASES = [
-  { clase: 'A', nombre: 'Motos, triciclos y cuatriciclos' },
-  { clase: 'B', nombre: 'Autos y camionetas' },
-  { clase: 'C', nombre: 'Camiones' },
-  { clase: 'D', nombre: 'Transporte de pasajeros y emergencias' },
-  { clase: 'E', nombre: 'Articulados y maquinaria especial' },
-  { clase: 'F', nombre: 'Vehículos adaptados' },
-  { clase: 'G', nombre: 'Maquinaria agrícola' },
+  { clase: 'A', nombre: 'Motos, triciclos y cuatriciclos', corto: 'Motos' },
+  { clase: 'B', nombre: 'Autos y camionetas', corto: 'Autos' },
+  { clase: 'C', nombre: 'Camiones', corto: 'Camiones' },
+  { clase: 'D', nombre: 'Transporte de pasajeros y emergencias', corto: 'Pasajeros' },
+  { clase: 'E', nombre: 'Articulados y maquinaria especial', corto: 'Articulados' },
+  { clase: 'F', nombre: 'Vehículos adaptados', corto: 'Adaptados' },
+  { clase: 'G', nombre: 'Maquinaria agrícola', corto: 'Agrícolas' },
 ]
 
 export const CATEGORIAS_LICENCIA = [

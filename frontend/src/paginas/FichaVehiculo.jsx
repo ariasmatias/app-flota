@@ -4,6 +4,7 @@ import { ArrowLeft, Truck } from 'lucide-react'
 import { MODO_DESARROLLO } from '../core/sesion/SesionContext'
 import { fichaCompleta } from '../core/datos/fichaVehiculo'
 import { flotaDePrueba } from '../core/datos/flotaDePrueba'
+import { ChipCategoria } from '../core/componentes/CategoriaLicencia'
 
 const fecha = (v) => (v ? new Intl.DateTimeFormat('es-AR', { timeZone: 'UTC' }).format(new Date(`${v}T12:00:00Z`)) : '—')
 const dias = (v, ref) => Math.round((Date.parse(`${v}T12:00:00Z`) - Date.parse(`${ref}T12:00:00Z`)) / 86400000)
@@ -73,7 +74,7 @@ export default function FichaVehiculo() {
         <div>
           <span className="ficha-kicker">FICHA DEL VEHÍCULO · CONSULTA</span>
           <h1><span className="ficha-dominio">{v.dominio}</span> {v.marca} {v.modelo}</h1>
-          <p>Categoría requerida {ficha.categoria} · {ficha.estado ? <Etiqueta>{ficha.estado}</Etiqueta> : 'sin estado'}</p>
+          <p>Categoría requerida {ficha.categoria === 'Sin exigencia' ? 'sin exigencia' : <ChipCategoria codigo={ficha.categoria} conTitulo />} · {ficha.estado ? <Etiqueta>{ficha.estado}</Etiqueta> : 'sin estado'}</p>
         </div>
       </header>
       <p className="ficha-demo"><b>Vista de prueba</b> · Datos ficticios del seed compartido. Solo lectura: los cambios se hacen en cada módulo.</p>

@@ -27,7 +27,7 @@ test('preserva casos de prueba de licencias, bajas, autorizaciones y fechas rela
   assert.equal(datos.autorizaciones.find(a => a.persona_id === 10).revision, 'no')
   for (const id of [3, 5, 19]) assert.equal(datos.autorizaciones.find(a => a.persona_id === id).revision, 'pendiente')
   assert.equal(licencia(19), undefined)
-  assert.deepEqual(licencia(15).categorias, ['A.2'])
+  assert.deepEqual(licencia(15).categorias, ['A.2.1'])
   assert.deepEqual(licencia(1).categorias, ['B.1', 'C.1'])
   assert.equal(licencia(2).documento.nombre, 'licencia-benitez.pdf')
   assert.equal(licencia(1).documentos_versiones.some(d => vigenteEn(d, '2024-01-01')), false)

@@ -10,6 +10,8 @@
 // Excepción: en poliza y vtv, vigente_hasta es la fecha de vencimiento del
 // documento (puede ser futura). Se interpreta como último día cubierto.
 
+import { habilita } from '../../core/config/categoriasLicencia.js'
+
 // ───────────── Fechas ─────────────
 
 export function hoy() {
@@ -154,6 +156,8 @@ export function validarAsignacion(datos, { persona_id, vehiculo_id, vigente_desd
   const estadoPersona = datos.estadosPersona.find((e) => e.persona_id === persona_id && vigenteEn(e, fecha))?.estado
   const estadoAuto = vehiculo ? estadoVehiculoEn(datos, vehiculo.id, fecha) : null
   const categoria = datos.categorias.find((c) => c.id === vehiculo?.categoria_requerida_id)?.codigo
+  // Una licencia incluye otra categoría solo si la normativa lo dice (ver core/config/categoriasLicencia.js).
+  const cat = habilita(licencia?.categorias ?? [], categoria)
   // Evita cargar dos veces la misma persona en el mismo vehículo con fechas que se pisan.
   const repetida = datos.asignaciones.find(
     (a) => a.persona_id === persona_id && a.vehiculo_id === vehiculo_id && (!a.vigente_hasta || a.vigente_hasta > fecha),
@@ -170,8 +174,12 @@ export function validarAsignacion(datos, { persona_id, vehiculo_id, vigente_desd
     },
     {
       id: 'categoria',
-      ok: !categoria || Boolean(licencia?.categorias.includes(categoria)),
-      texto: categoria ? `La licencia incluye la categoría ${categoria}` : 'El vehículo no exige categoría',
+      ok: !categoria || cat.ok,
+      texto: !categoria
+        ? 'El vehículo no exige categoría'
+        : cat.ok && !cat.directa
+          ? `La licencia habilita ${categoria} (la incluye ${cat.via})`
+          : `La licencia habilita la categoría ${categoria}`,
     },
     { id: 'autorizacion', ok: autorizacion?.revision === 'si', texto: 'Autorización para conducir en "sí"' },
     {

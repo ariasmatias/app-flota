@@ -144,3 +144,15 @@ test('una persona puede recibir varios vehículos de una vez (todo o nada)', () 
   assert.equal(repetido.ok, false)
   assert.match(repetido.texto, /Ya tiene este vehículo asignado desde el/)
 })
+
+test('la categoría se valida con las inclusiones oficiales', () => {
+  const datos = datosIniciales()
+  // Herrera (8) tiene C.1 y E.1, sin B.1 explícita: C.1 incluye B.1, así que puede manejar AA001ZZ (B.1).
+  const c = validarAsignacion(datos, { persona_id: 8, vehiculo_id: 1, vigente_desde: hoy() }).find((x) => x.id === 'categoria')
+  assert.equal(c.ok, true)
+  assert.match(c.texto, /habilita B\.1 \(la incluye (C\.1|E\.1)\)/)
+  // Benítez (B.1) sigue sin poder manejar la Daily (C.1): lo chico no incluye lo grande.
+  assert.equal(validarAsignacion(datos, { persona_id: 2, vehiculo_id: 3, vigente_desde: hoy() }).find((x) => x.id === 'categoria').ok, false)
+  // Paz (A.2.1, cuatriciclo) no puede manejar utilitarios.
+  assert.equal(validarAsignacion(datos, { persona_id: 15, vehiculo_id: 1, vigente_desde: hoy() }).find((x) => x.id === 'categoria').ok, false)
+})

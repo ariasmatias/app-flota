@@ -4,6 +4,7 @@ import { Search, Plus } from 'lucide-react'
 import { hoy, vigenteEn, estadoVencimiento, problemasDeAsignacion } from './dominio'
 import { Etiqueta, Panel, fecha } from './ui'
 import FormAsignacion from './FormAsignacion'
+import { CategoriasLicencia, GuiaCategorias } from '../../core/componentes/CategoriaLicencia'
 
 // Lo que tiene hoy cada persona: estado, licencia, autorización y vehículos.
 function situacion(datos, personaId, f = hoy()) {
@@ -29,7 +30,7 @@ export default function Conductores({ datos, usuario, actualizar }) {
   const personas = datos.personas.filter((p) => !q || `${p.apellido_nombre} ${p.legajo}`.toLowerCase().includes(q))
 
   return (
-    <Panel titulo="Conductores" subtitulo="Quién maneja qué. Una persona puede tener varios vehículos asignados a la vez.">
+    <Panel titulo="Conductores" subtitulo={<>Quién maneja qué. Una persona puede tener varios vehículos asignados a la vez. <GuiaCategorias /></>}>
       <div className="mant-filtros">
         <label className="mant-busqueda">
           <Search size={18} />
@@ -38,7 +39,7 @@ export default function Conductores({ datos, usuario, actualizar }) {
       </div>
       <div className="mant-scroll">
         <table>
-          <thead><tr><th>Persona</th><th>Estado</th><th>Licencia</th><th>Autorización</th><th>Vehículos hoy</th><th>Acción</th></tr></thead>
+          <thead><tr><th>Persona</th><th>Estado</th><th>Licencia</th><th>Categorías</th><th>Autorización</th><th>Vehículos hoy</th><th>Acción</th></tr></thead>
           <tbody>
             {personas.map((p) => {
               const s = situacion(datos, p.id)
@@ -47,6 +48,7 @@ export default function Conductores({ datos, usuario, actualizar }) {
                   <td><b>{p.apellido_nombre}</b><small>{p.legajo}</small></td>
                   <td><Etiqueta tono={s.estado === 'alta' ? 'ok' : 'error'}>{s.estado}</Etiqueta></td>
                   <td>{s.licencia ? <Etiqueta>{estadoVencimiento(s.licencia.vencimiento)}</Etiqueta> : <Etiqueta tono="neutro">Sin licencia</Etiqueta>}</td>
+                  <td><CategoriasLicencia codigos={s.licencia?.categorias} /></td>
                   <td><Etiqueta>{s.autorizacion?.revision ?? 'Sin dato'}</Etiqueta></td>
                   <td>
                     <div className="mant-chips">
@@ -82,7 +84,7 @@ function FichaPersona({ datos, id, usuario, actualizar, volver }) {
       >
         <dl className="mant-datos">
           <div><dt>Estado del personal</dt><dd><Etiqueta tono={s.estado === 'alta' ? 'ok' : 'error'}>{s.estado}</Etiqueta></dd></div>
-          <div><dt>Licencia</dt><dd>{s.licencia ? <>{s.licencia.categorias.join(' · ')} · vence {fecha(s.licencia.vencimiento)} <Etiqueta>{estadoVencimiento(s.licencia.vencimiento)}</Etiqueta></> : 'Sin licencia cargada'}</dd></div>
+          <div><dt>Licencia</dt><dd>{s.licencia ? <><CategoriasLicencia codigos={s.licencia.categorias} /> · vence {fecha(s.licencia.vencimiento)} <Etiqueta>{estadoVencimiento(s.licencia.vencimiento)}</Etiqueta></> : 'Sin licencia cargada'}</dd></div>
           <div><dt>Autorización para conducir</dt><dd><Etiqueta>{s.autorizacion?.revision ?? 'Sin dato'}</Etiqueta></dd></div>
         </dl>
       </Panel>

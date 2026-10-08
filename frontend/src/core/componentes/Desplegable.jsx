@@ -23,7 +23,7 @@ import { Check, ChevronDown, Search, X } from 'lucide-react'
  * - `multiple`: se eligen varias opciones (valor = array); la lista queda
  *   abierta para seguir marcando y el campo muestra las elegidas.
  *
- * opciones: [{ valor, etiqueta, detalle?, deshabilitada? }] o
+ * opciones: [{ valor, etiqueta, detalle?, icono?, deshabilitada? }] o
  *           { separador: true, etiqueta } para títulos de grupo.
  */
 export default function Desplegable({
@@ -209,7 +209,7 @@ export default function Desplegable({
             </span>
           ) : (
             <span className={elegida ? 'desplegable-valor' : 'desplegable-placeholder'}>
-              {elegida ? elegida.etiqueta : placeholder}
+              {elegida?.icono}{elegida ? elegida.etiqueta : placeholder}
               {elegida?.detalle && <small> {elegida.detalle}</small>}
             </span>
           )}
@@ -263,7 +263,7 @@ export default function Desplegable({
                   onClick={() => elegir(o)}
                 >
                   {multiple && <span className={`desplegable-casilla${sel ? ' marcada' : ''}`} aria-hidden="true">{sel && <Check size={12} />}</span>}
-                  <span className="desplegable-texto">{o.etiqueta}{o.detalle && <small> {o.detalle}</small>}</span>
+                  <span className="desplegable-texto">{o.icono}{o.etiqueta}{o.detalle && <small> {o.detalle}</small>}</span>
                   {sel && !multiple && <Check size={15} aria-hidden="true" />}
                 </li>
               )

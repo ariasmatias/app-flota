@@ -4,15 +4,17 @@ import { hoy, validarAsignacion, estadoVehiculoEn } from './dominio'
 import { guardarAsignaciones } from './servicioDemo'
 import { MensajeError, intentar, persona as nombrePersona } from './ui'
 import Desplegable from '../../core/componentes/Desplegable'
+import { IconoCategoria } from '../../core/componentes/CategoriaLicencia'
 
 // Controles que dependen solo de la persona (se muestran una vez) y los que
 // dependen de cada vehículo (se muestran por vehículo).
 const DE_PERSONA = ['persona', 'licencia', 'autorizacion']
 
-function Control({ c }) {
+function Control({ c, categoria }) {
   return (
     <li className={c.ok ? 'ok' : 'falla'}>
       {c.ok ? <CircleCheck size={16} /> : <CircleX size={16} />} {c.texto}
+      {c.id === 'categoria' && categoria && <IconoCategoria codigo={categoria} size={18} />}
     </li>
   )
 }
@@ -89,7 +91,9 @@ export default function FormAsignacion({ datos, usuario, hecho, vehiculoFijo = n
             <div key={vehiculo.id}>
               <h4><span className="mant-dominio">{vehiculo.dominio}</span> {vehiculo.marca} {vehiculo.modelo}</h4>
               <ul className="mant-controles">
-                {controles.filter((c) => !DE_PERSONA.includes(c.id)).map((c) => <Control key={c.id} c={c} />)}
+                {controles.filter((c) => !DE_PERSONA.includes(c.id)).map((c) => (
+                  <Control key={c.id} c={c} categoria={datos.categorias.find((k) => k.id === vehiculo.categoria_requerida_id)?.codigo} />
+                ))}
               </ul>
             </div>
           ))}

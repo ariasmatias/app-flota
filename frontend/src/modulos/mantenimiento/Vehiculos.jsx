@@ -3,12 +3,18 @@ import { Link } from 'react-router-dom'
 import { Search, Plus } from 'lucide-react'
 import { hoy, estadoVehiculoEn, estadoVencimiento, vtvDeVehiculoEn, polizaDeVehiculoEn, fichaVehiculoEn, ESTADOS_VEHICULO, vigenteEn } from './dominio'
 import { guardarVehiculo, guardarCorreccion, guardarEstado } from './servicioDemo'
-import { Etiqueta, Panel, MensajeError, intentar, fecha, persona, categoria } from './ui'
+import { Etiqueta, Panel, MensajeError, intentar, fecha, persona } from './ui'
+import { infoCategoria } from '../../core/config/categoriasLicencia'
 import FormAsignacion from './FormAsignacion'
 import Desplegable from '../../core/componentes/Desplegable'
+import { ChipCategoria, IconoCategoria, GuiaCategorias } from '../../core/componentes/CategoriaLicencia'
 
 const capital = (t) => t.charAt(0).toUpperCase() + t.slice(1)
-const opcionesCategoria = (datos) => [{ valor: '', etiqueta: 'Sin exigencia' }, ...datos.categorias.map((c) => ({ valor: c.id, etiqueta: c.codigo }))]
+const opcionesCategoria = (datos) => [
+  { valor: '', etiqueta: 'Sin exigencia' },
+  ...datos.categorias.map((c) => ({ valor: c.id, etiqueta: c.codigo, icono: <IconoCategoria codigo={c.codigo} size={18} />, detalle: `· ${infoCategoria(c.codigo).titulo}` })),
+]
+const codigoCategoria = (datos, id) => datos.categorias.find((c) => c.id === id)?.codigo
 
 // M-01 / M-02 / M-09: listado, alta, corrección, estado y ficha por fecha.
 export default function Vehiculos({ datos, usuario, actualizar, seleccion, setSeleccion }) {
@@ -31,7 +37,7 @@ export default function Vehiculos({ datos, usuario, actualizar, seleccion, setSe
       {alta && <FormAlta datos={datos} usuario={usuario} cerrar={() => setAlta(false)} actualizar={actualizar} />}
       <Panel
         titulo="Vehículos"
-        subtitulo="Flota interna. El dominio es único y se guarda normalizado."
+        subtitulo={<>Flota interna. El dominio es único y se guarda normalizado. <GuiaCategorias /></>}
         acciones={!alta && <button className="mant-boton" onClick={() => setAlta(true)}><Plus size={16} /> Nuevo vehículo</button>}
       >
         <div className="mant-filtros">
@@ -59,7 +65,7 @@ export default function Vehiculos({ datos, usuario, actualizar, seleccion, setSe
                 return (
                   <tr key={v.id}>
                     <td><b className="mant-dominio">{v.dominio}</b></td>
-                    <td>{v.marca} {v.modelo}<small>Categoría {categoria(datos, v.categoria_requerida_id)}</small></td>
+                    <td>{v.marca} {v.modelo}<small>{codigoCategoria(datos, v.categoria_requerida_id) ? <ChipCategoria codigo={codigoCategoria(datos, v.categoria_requerida_id)} /> : 'Sin exigencia de categoría'}</small></td>
                     <td><Etiqueta>{estado}</Etiqueta></td>
                     <td>{conductores || '—'}</td>
                     <td>{estado === 'baja' ? '—' : poliza ? <Etiqueta>{estadoVencimiento(poliza.vigente_hasta)}</Etiqueta> : <Etiqueta>Sin cobertura</Etiqueta>}</td>
@@ -124,7 +130,7 @@ function Ficha({ datos, id, usuario, actualizar, volver }) {
       <button className="mant-enlace" onClick={volver}>← Volver a vehículos</button>
       <Panel
         titulo={<><span className="mant-dominio grande">{v.dominio}</span> {v.marca} {v.modelo}</>}
-        subtitulo={`Categoría requerida: ${categoria(datos, v.categoria_requerida_id)}`}
+        subtitulo={<>Categoría requerida: {codigoCategoria(datos, v.categoria_requerida_id) ? <ChipCategoria codigo={codigoCategoria(datos, v.categoria_requerida_id)} conTitulo /> : 'sin exigencia'}</>}
         acciones={
           <label className="mant-consulta">Consultar al
             <input type="date" max={hoy()} value={consulta} onChange={(e) => e.target.value && e.target.value <= hoy() && setConsulta(e.target.value)} />

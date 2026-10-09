@@ -6,6 +6,7 @@ import { useTema } from '../tema/TemaContext'
 import { AREAS } from '../config/areas'
 import { USUARIOS_DE_PRUEBA } from '../sesion/usuariosDePrueba'
 import Logo from '../componentes/Logo'
+import Login from '../../paginas/Login'
 import Desplegable from '../componentes/Desplegable'
 
 function iniciales(nombre = '') {
@@ -93,6 +94,7 @@ export default function Layout() {
 
         <main className="contenido">
           {cargando && <p className="estado">Cargando sesión…</p>}
+          {!MODO_DESARROLLO && !cargando && !usuario && !error && <Login />}
           {error && (
             <p className="estado estado-error">
               No se pudo obtener la sesión. Volvé a ingresar o avisá a Sistemas.

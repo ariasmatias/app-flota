@@ -43,6 +43,31 @@ export function createSessionRoutes({ config, provider }) {
     });
   }
 
+  if (config.authMode === 'ldap-gssapi') {
+    router.post('/login', sessionMutation, async (req, res) => {
+      const { usuario, password } = req.body ?? {};
+      if (typeof usuario !== 'string' || typeof password !== 'string') {
+        return res.status(400).json({ error: 'Usuario y contraseña requeridos' });
+      }
+      // Impedir que una contraseña corporativa viaje por HTTP desde otra máquina.
+      // Producción sigue bloqueada hasta contar con TLS y autorización en BD.
+      const remote = req.socket.remoteAddress;
+      const loopback = remote === '127.0.0.1' || remote === '::1' || remote === '::ffff:127.0.0.1';
+      if (!req.secure && !(loopback && req.get('host') === '127.0.0.1:3001')) {
+        return res.status(403).json({ error: 'El inicio de sesión requiere HTTPS' });
+      }
+      let identity;
+      try {
+        identity = await provider.authenticateCredentials(usuario, password);
+      } catch {
+        return res.status(503).json({ error: 'Autenticación no disponible' });
+      }
+      if (!identity) return res.status(401).json({ error: 'Credenciales incorrectas' });
+      // Importante: solo pruebas en development hasta implementar autorización en BD.
+      res.json(await establishSession(req, identity));
+    });
+  }
+
   router.post('/logout', sessionMutation, async (req, res) => {
     await new Promise((resolve, reject) => req.session.destroy(error => error ? reject(error) : resolve()));
     clearSessionCookie(res, config);

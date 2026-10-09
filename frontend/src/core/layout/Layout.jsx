@@ -106,7 +106,7 @@ export default function Layout() {
         </header>
 
         <main className="contenido">
-          {errorSalida && <p role="alert" className="estado estado-error">{errorSalida}</p>
+          {errorSalida && <p role="alert" className="estado estado-error">{errorSalida}</p>}
           {cargando && <p className="estado">Cargando sesión…</p>}
           {!MODO_DESARROLLO && !cargando && !usuario && !error && <Login />}
           {error && (

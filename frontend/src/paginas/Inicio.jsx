@@ -44,7 +44,7 @@ export default function Inicio() {
 
   const visibles = useMemo(() => {
     const q = busqueda.trim().toLowerCase()
-    return modulosVisibles(usuario, MODULOS).filter(
+    return (usuario && !MODO_DESARROLLO && usuario.area == null ? MODULOS : modulosVisibles(usuario, MODULOS)).filter(
       (m) => !q || `${m.nombre} ${m.descripcion}`.toLowerCase().includes(q),
     )
   }, [usuario, busqueda])
@@ -58,7 +58,7 @@ export default function Inicio() {
         <h1>
           {saludo()}, {primerNombre}
         </h1>
-        <p>Elegí un módulo para empezar a trabajar.</p>
+        <p>{!MODO_DESARROLLO && usuario.area == null ? 'Vista demostrativa: los módulos todavía no permiten operar con datos reales.' : 'Elegí un módulo para empezar a trabajar.'}</p>
         <div className="chips">
           {AVISOS.map((a) => (
             <Chip key={a.id} tono={a.tono} icono={ICONO_AVISO[a.tono]} ruta={a.ruta}>

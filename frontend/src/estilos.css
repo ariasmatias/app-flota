@@ -396,3 +396,12 @@ body.dark .guia-categorias-boton { color: var(--aubasa-suave); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; }
 }
+
+/* Ingreso corporativo manual */
+.flota-login { display: flex; justify-content: center; padding: 70px 16px; }
+.flota-login-form { display: flex; flex-direction: column; gap: 12px; width: min(100%, 420px); padding: 32px; border-radius: 22px; }
+.flota-login-form h1 { font-size: 30px; }
+.flota-login-form p { color: var(--texto-2); margin-bottom: 12px; }
+.flota-login-form input { padding: 12px; background: var(--superficie); border: 1px solid var(--vidrio-borde); border-radius: 10px; }
+.flota-login-form button { padding: 12px; background: var(--aubasa-profundo); color: white; border: 0; border-radius: 10px; cursor: pointer; }
+.flota-login-form button:disabled { opacity: .6; cursor: wait; }

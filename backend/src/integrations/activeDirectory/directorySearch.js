@@ -53,6 +53,7 @@ export function buildExactAccountFilter(account) {
 
 /** El bit ACCOUNTDISABLE (0x2) es el que define deshabilitación. */
 export function isAdAccountEnabled(userAccountControl) {
+  if (userAccountControl === null || userAccountControl === undefined || userAccountControl === '') return false;
   const value = Number(userAccountControl);
   return Number.isSafeInteger(value) && value >= 0 && (value & 2) === 0;
 }

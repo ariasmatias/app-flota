@@ -57,7 +57,10 @@ export function createSessionRoutes({ config, provider }) {
       // Producción sigue bloqueada hasta contar con TLS y autorización en BD.
       const remote = req.socket.remoteAddress;
       const loopback = remote === '127.0.0.1' || remote === '::1' || remote === '::ffff:127.0.0.1';
-      if (!req.secure && !(loopback && req.get('host') === '127.0.0.1:3001')) {
+      // Solo acceso local al puerto de esta instancia: apto para un piloto
+      // Vite por túnel SSH, NO equivale a HTTPS para usuarios de intranet.
+      const localHost = req.get('host') === `127.0.0.1:${config.port}`;
+      if (!req.secure && !(loopback && localHost)) {
         return res.status(403).json({ error: 'El inicio de sesión requiere HTTPS' });
       }
       let identity;

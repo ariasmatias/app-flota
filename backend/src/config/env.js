@@ -21,11 +21,15 @@ export function readEnv(source = process.env) {
     throw new ConfigurationError('SESSION_SECRET requiere al menos 32 bytes, provistos por el entorno.');
   }
   const authMode = source.AUTH_MODE ?? 'development';
-  if (!['development', 'kerberos'].includes(authMode)) {
-    throw new ConfigurationError('AUTH_MODE debe ser development o kerberos.');
+  if (!['development', 'kerberos', 'ldap-gssapi'].includes(authMode)) {
+    throw new ConfigurationError('AUTH_MODE debe ser development, kerberos o ldap-gssapi.');
   }
   if (authMode === 'development' && environment !== 'development') {
     throw new ConfigurationError('AUTH_MODE=development solo se permite con APP_ENV=development.');
+  }
+  // Sin autorización persistente, el login corporativo se limita a pruebas locales.
+  if (authMode === 'ldap-gssapi' && environment !== 'development') {
+    throw new ConfigurationError('LDAP/GSSAPI requiere autorización y sesiones persistentes antes de producción.');
   }
   const idleMinutes = Number(source.SESSION_IDLE_MINUTES ?? 30);
   if (!Number.isInteger(idleMinutes) || idleMinutes < 1 || idleMinutes > 1440) {

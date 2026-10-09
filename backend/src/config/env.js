@@ -31,6 +31,12 @@ export function readEnv(source = process.env) {
   if (authMode === 'ldap-gssapi' && environment !== 'development') {
     throw new ConfigurationError('LDAP/GSSAPI requiere autorización y sesiones persistentes antes de producción.');
   }
+  const rawAllowed = source.AD_DEMO_ALLOWED_USERS ?? '';
+  const allowedUsers = rawAllowed.split(',').map(value => value.trim().toLowerCase()).filter(Boolean);
+  if (authMode === 'ldap-gssapi' && (allowedUsers.length === 0
+      || !allowedUsers.every(value => /^[a-z0-9][a-z0-9._-]{0,59}$/.test(value)))) {
+    throw new ConfigurationError('AD_DEMO_ALLOWED_USERS requiere usuarios de dominio válidos para pruebas.');
+  }
   const idleMinutes = Number(source.SESSION_IDLE_MINUTES ?? 30);
   if (!Number.isInteger(idleMinutes) || idleMinutes < 1 || idleMinutes > 1440) {
     throw new ConfigurationError('SESSION_IDLE_MINUTES debe ser un entero entre 1 y 1440.');

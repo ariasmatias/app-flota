@@ -38,9 +38,23 @@ export function SesionProvider({ children }) {
     fetch('/api/sesion', { credentials: 'include' })
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
       .then(setUsuario)
-      .catch(setError)
+      .catch(e => { if (!String(e.message).includes('401')) setError(e) })
       .finally(() => setCargando(false))
   }, [])
+
+  async function iniciarSesion(usuarioIngresado, password) {
+    const response = await fetch('/api/sesion/login', {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json', 'X-Flota-Session': '1' },
+      body: JSON.stringify({ usuario: usuarioIngresado, password }),
+    })
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}))
+      throw new Error(body.error || 'No se pudo iniciar sesión')
+    }
+    setUsuario(await response.json())
+    setError(null)
+  }
 
   // Solo en desarrollo: cambiar el usuario simulado.
   function verComo(id) {
@@ -55,7 +69,7 @@ export function SesionProvider({ children }) {
   }
 
   return (
-    <SesionContext.Provider value={{ usuario, cargando, error, verComo }}>
+    <SesionContext.Provider value={{ usuario, cargando, error, verComo, iniciarSesion }}>
       {children}
     </SesionContext.Provider>
   )

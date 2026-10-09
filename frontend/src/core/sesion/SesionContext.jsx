@@ -14,6 +14,9 @@ import { USUARIOS_DE_PRUEBA } from './usuariosDePrueba'
 
 const MODO = import.meta.env.VITE_AUTH_MODE ?? (import.meta.env.DEV ? 'development' : 'real')
 export const MODO_DESARROLLO = MODO === 'development'
+// Muestra los prototipos existentes también después del login real, solo si
+// el build del equipo habilita explícitamente las vistas con datos ficticios.
+export const VISTAS_DEMO = MODO_DESARROLLO || import.meta.env.VITE_PREVIEW_MODULES === '1'
 
 const CLAVE_LOCAL = 'flota.usuarioDePrueba'
 

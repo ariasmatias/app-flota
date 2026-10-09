@@ -25,7 +25,7 @@ export default function Login() {
   return (
     <main className="flota-login">
       <form className="flota-login-form vidrio" onSubmit={enviar}>
-        <h1>App FLOTA</h1>
+        <h1>Gestión de Flota</h1>
         <p>Ingresá con tu cuenta corporativa de AUBASA.</p>
         <label htmlFor="usuario-ad">Usuario</label>
         <input id="usuario-ad" autoComplete="username" value={usuario} required

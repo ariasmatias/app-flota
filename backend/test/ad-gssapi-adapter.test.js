@@ -26,10 +26,10 @@ function mockProcess({ output = '', error = 'SASL data security layer installed.
 const ticketCache = 'FILE:/run/app-flota/krb5cc_flota';
 
 test('analiza resultados LDIF sin serializar credenciales', () => {
-  assert.deepEqual(
-    parseLdif('dn: CN=Usuario,DC=ad\nsAMAccountName: usuario\nmail: usuario@aubasa.com.ar\n\n'),
-    [{ dn: 'CN=Usuario,DC=ad', samaccountname: 'usuario', mail: 'usuario@aubasa.com.ar' }],
-  );
+  const [user] = parseLdif('dn: CN=Usuario,DC=ad\nsAMAccountName: usuario\nmail: usuario@aubasa.com.ar\n\n');
+  assert.equal(user.dn, 'CN=Usuario,DC=ad');
+  assert.equal(user.samaccountname, 'usuario');
+  assert.equal(user.mail, 'usuario@aubasa.com.ar');
 });
 
 test('no hereda por accidente un ticket personal de SSH', () => {

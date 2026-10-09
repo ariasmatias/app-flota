@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, Users, Search } from 'lucide-react'
-import { useSesion, MODO_DESARROLLO } from '../../core/sesion/SesionContext'
+import { useSesion, VISTAS_DEMO } from '../../core/sesion/SesionContext'
 import { vigenteEn, hoy, estadoLicencia, contextoMulta, diasHasta, ESTADOS_GESTION, esAviso, gestionesDePersona } from './dominio'
 import { datosIniciales, guardarLicencia, guardarMulta } from './servicioDemo'
 import { CategoriasLicencia, GuiaCategorias, SelectorCategorias } from '../../core/componentes/CategoriaLicencia'
@@ -32,7 +32,7 @@ async function adjunto(f) {
   return { nombre: f.name, hash, archivo: f }
 }
 export default function Modulo() {
-  if (!MODO_DESARROLLO) return <section className="pagina"><h1>Recursos Humanos</h1><p>La conexión con la API de RRHH todavía está pendiente.</p></section>
+  if (!VISTAS_DEMO) return <section className="pagina"><h1>Recursos Humanos</h1><p>La conexión con la API de RRHH todavía está pendiente.</p></section>
   return <Demo />
 }
 function Demo() {

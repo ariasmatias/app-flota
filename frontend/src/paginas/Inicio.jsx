@@ -3,15 +3,15 @@ import { Link, useOutletContext } from 'react-router-dom'
 import { CircleAlert, Bell, ShieldCheck, Truck, ChevronRight } from 'lucide-react'
 import { MODULOS, SECCIONES } from '../core/config/modulos'
 import { modulosVisibles } from '../core/config/permisos'
-import { useSesion, MODO_DESARROLLO } from '../core/sesion/SesionContext'
+import { useSesion, MODO_DESARROLLO, VISTAS_DEMO } from '../core/sesion/SesionContext'
 import { PENDIENTES_DE_PRUEBA, AVISOS_DE_PRUEBA } from '../core/sesion/datosDePrueba'
 import TarjetaModulo from '../core/componentes/TarjetaModulo'
 import Chip from '../core/componentes/Chip'
 
 // Hasta que existan la bandeja (N-02) y los vencimientos (N-08), los números
 // solo se muestran en desarrollo, con datos de prueba.
-const PENDIENTES = MODO_DESARROLLO ? PENDIENTES_DE_PRUEBA : {}
-const AVISOS = MODO_DESARROLLO ? AVISOS_DE_PRUEBA : []
+const PENDIENTES = VISTAS_DEMO ? PENDIENTES_DE_PRUEBA : {}
+const AVISOS = VISTAS_DEMO ? AVISOS_DE_PRUEBA : []
 const ICONO_AVISO = { alerta: CircleAlert, info: Bell, ok: ShieldCheck }
 
 function saludo() {
@@ -27,7 +27,7 @@ function saludo() {
 function useVehiculosBuscados(texto) {
   const [resultado, setResultado] = useState([])
   useEffect(() => {
-    if (!MODO_DESARROLLO || texto.trim().length < 2) { setResultado([]); return }
+    if (!VISTAS_DEMO || texto.trim().length < 2) { setResultado([]); return }
     let vigente = true
     Promise.all([import('../core/datos/flotaDePrueba'), import('../core/datos/fichaVehiculo')]).then(([f, b]) => {
       if (vigente) setResultado(b.buscarVehiculos(f.flotaDePrueba(), texto))
@@ -58,7 +58,7 @@ export default function Inicio() {
         <h1>
           {saludo()}, {primerNombre}
         </h1>
-        <p>{!MODO_DESARROLLO && usuario.area == null ? 'Vista demostrativa: los módulos todavía no permiten operar con datos reales.' : 'Elegí un módulo para empezar a trabajar.'}</p>
+        <p>{VISTAS_DEMO && !MODO_DESARROLLO ? 'Prototipo con datos ficticios: los cambios no se guardan en la base de datos.' : !MODO_DESARROLLO && usuario.area == null ? 'Vista demostrativa: los módulos todavía no permiten operar con datos reales.' : 'Elegí un módulo para empezar a trabajar.'}</p>
         <div className="chips">
           {AVISOS.map((a) => (
             <Chip key={a.id} tono={a.tono} icono={ICONO_AVISO[a.tono]} ruta={a.ruta}>

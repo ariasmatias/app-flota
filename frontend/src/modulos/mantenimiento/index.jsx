@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, Truck } from 'lucide-react'
-import { useSesion, MODO_DESARROLLO } from '../../core/sesion/SesionContext'
+import { useSesion, VISTAS_DEMO } from '../../core/sesion/SesionContext'
 import { hoy, estadoVehiculoEn, estadoVencimiento, vtvDeVehiculoEn, polizaDeVehiculoEn, problemasDeAsignacion } from './dominio'
 import { datosIniciales } from './servicioDemo'
 import Vehiculos from './Vehiculos'
@@ -20,7 +20,7 @@ const SECCIONES = [
 ]
 
 export default function Modulo() {
-  if (!MODO_DESARROLLO) {
+  if (!VISTAS_DEMO) {
     return (
       <section className="pagina">
         <h1>Mantenimiento</h1>

@@ -14,7 +14,10 @@ export function createSessionRoutes({ config, provider }) {
   function sessionMutation(req, res, next) {
     const origin = req.get('origin');
     const sameOrigin = `${req.protocol}://${req.get('host')}`;
-    const viteOrigin = config.environment === 'development' && origin === 'http://localhost:5173';
+    const viteOrigin = config.environment === 'development' && (
+      origin === 'http://localhost:5173' ||
+      (config.authMode === 'ldap-gssapi' && config.port === 3002 && origin === 'http://localhost:5174')
+    );
     if (req.get('X-Flota-Session') !== '1'
         || req.get('Sec-Fetch-Site') === 'cross-site'
         || (origin && origin !== sameOrigin && !viteOrigin)) {

@@ -70,9 +70,10 @@ export function createLdapGssapiAuthenticator({
       });
       if (login.code !== 0) return null;
       // Una segunda prueba obliga a autenticar con el directorio por LDAP 389.
+      // Sin -Q: ldapwhoami debe informar la negociación SASL para verificar SSF.
       // Exigimos la capa SASL protegida: ni simple bind ni anonimato.
       const ldap = await run('/usr/bin/ldapwhoami', [
-        '-Y', 'GSSAPI', '-H', 'ldap://' + host + ':389', '-Q',
+        '-Y', 'GSSAPI', '-H', 'ldap://' + host + ':389',
       ], { env });
       if (ldap.code !== 0 || !/SASL data security layer installed\./.test(ldap.stderr)
           || !/^(?:dn:|u:)/m.test(ldap.stdout)) {

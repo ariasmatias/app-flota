@@ -28,6 +28,7 @@ test('valida credenciales sin pasarlas como argumentos, exige GSSAPI', async () 
   assert.equal(calls.length, 2);
   assert.ok(calls[0].binary.endsWith('/kinit'));
   assert.ok(calls[1].args.includes('GSSAPI'));
+  assert.ok(!calls[1].args.includes('-Q'), 'ldapwhoami debe informar la negociación SASL');
   assert.ok(calls[1].args.some(arg => arg.startsWith('ldap://') && arg.endsWith(':389')));
   assert.ok(!calls.some(c => c.args.includes('clave-de-prueba')));
   assert.equal(calls[0].options.stdin, 'clave-de-prueba\n');

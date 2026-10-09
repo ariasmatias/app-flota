@@ -63,6 +63,9 @@ export function createSessionRoutes({ config, provider }) {
         return res.status(503).json({ error: 'Autenticación no disponible' });
       }
       if (!identity) return res.status(401).json({ error: 'Credenciales incorrectas' });
+      if (!config.adDemoAllowedUsers.includes(identity.usuario.toLowerCase())) {
+        return res.status(403).json({ error: 'Acceso no autorizado' });
+      }
       // Importante: solo pruebas en development hasta implementar autorización en BD.
       res.json(await establishSession(req, identity));
     });

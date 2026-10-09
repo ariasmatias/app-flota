@@ -17,6 +17,7 @@ test('builds an enabled-only search filter', () => {
 
 test('rejects invalid search and exact account inputs', () => {
   assert.throws(() => buildEmployeeSearchFilter('a'));
+  assert.throws(() => buildEmployeeSearchFilter('**'));
   assert.throws(() => buildExactAccountFilter('(admin)'));
 });
 
@@ -24,4 +25,6 @@ test('checks disabled bit independently of account type', () => {
   assert.equal(isAdAccountEnabled(512), true);
   assert.equal(isAdAccountEnabled(514), false);
   assert.equal(isAdAccountEnabled(undefined), false);
+  assert.equal(isAdAccountEnabled(null), false);
+  assert.equal(isAdAccountEnabled(''), false);
 });

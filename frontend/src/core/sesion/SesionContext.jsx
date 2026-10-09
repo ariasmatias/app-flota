@@ -32,9 +32,14 @@ export function SesionProvider({ children }) {
   const [usuario, setUsuario] = useState(MODO_DESARROLLO ? leerUsuarioDePrueba() : null)
   const [cargando, setCargando] = useState(!MODO_DESARROLLO)
   const [error, setError] = useState(null)
+  const [modoBackend, setModoBackend] = useState(null)
 
   useEffect(() => {
     if (MODO_DESARROLLO) return
+    fetch('/api/sesion/modo', { credentials: 'include' })
+      .then(r => { if (!r.ok) throw new Error('No se pudo verificar el modo de autenticación'); return r.json() })
+      .then(data => setModoBackend(data.modo))
+      .catch(() => setModoBackend('desconocido'))
     fetch('/api/sesion', { credentials: 'include' })
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
       .then(setUsuario)
@@ -43,6 +48,9 @@ export function SesionProvider({ children }) {
   }, [])
 
   async function iniciarSesion(usuarioIngresado, password) {
+    if (modoBackend === null || modoBackend === 'desconocido') throw new Error('No se pudo verificar la autenticación del servidor')
+    if (modoBackend === 'simulado' && (usuarioIngresado || password)) throw new Error('El acceso de demostración no utiliza credenciales')
+    if (modoBackend === 'corporativo' && !window.isSecureContext) throw new Error('Para ingresar credenciales corporativas se requiere HTTPS')
     const response = await fetch('/api/sesion/login', {
       method: 'POST', credentials: 'include',
       headers: { 'Content-Type': 'application/json', 'X-Flota-Session': '1' },
@@ -53,6 +61,15 @@ export function SesionProvider({ children }) {
       throw new Error(body.error || 'No se pudo iniciar sesión')
     }
     setUsuario(await response.json())
+    setError(null)
+  }
+
+  async function cerrarSesion() {
+    const response = await fetch('/api/sesion/logout', {
+      method: 'POST', credentials: 'include', headers: { 'X-Flota-Session': '1' },
+    })
+    if (!response.ok) throw new Error('No se pudo cerrar la sesión')
+    setUsuario(null)
     setError(null)
   }
 
@@ -69,7 +86,7 @@ export function SesionProvider({ children }) {
   }
 
   return (
-    <SesionContext.Provider value={{ usuario, cargando, error, verComo, iniciarSesion }}>
+    <SesionContext.Provider value={{ usuario, cargando, error, verComo, iniciarSesion, cerrarSesion, modoBackend }}>
       {children}
     </SesionContext.Provider>
   )

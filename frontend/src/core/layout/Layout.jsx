@@ -1,6 +1,6 @@
 import { Suspense, useState } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
-import { Search, Sun, Moon } from 'lucide-react'
+import { Search, Sun, Moon, LogOut } from 'lucide-react'
 import { useSesion, MODO_DESARROLLO } from '../sesion/SesionContext'
 import { useTema } from '../tema/TemaContext'
 import { AREAS } from '../config/areas'
@@ -19,7 +19,16 @@ function iniciales(nombre = '') {
 }
 
 export default function Layout() {
-  const { usuario, cargando, error, verComo } = useSesion()
+  const { usuario, cargando, error, verComo, cerrarSesion } = useSesion()
+  const [errorSalida, setErrorSalida] = useState('')
+  const [saliendo, setSaliendo] = useState(false)
+  async function salir() {
+    setSaliendo(true)
+    setErrorSalida('')
+    try { await cerrarSesion() }
+    catch { setErrorSalida('No se pudo cerrar la sesión. Intentá de nuevo.') }
+    finally { setSaliendo(false) }
+  }
   const { tema, alternar } = useTema()
   const { pathname } = useLocation()
   const [busqueda, setBusqueda] = useState('')
@@ -80,6 +89,10 @@ export default function Layout() {
               {tema === 'oscuro' ? <Sun size={18} /> : <Moon size={18} />}
             </button>
 
+            {usuario && !MODO_DESARROLLO && (
+              <button type="button" className="boton-redondo" aria-label="Cerrar sesión" title="Cerrar sesión" disabled={saliendo} onClick={salir}><LogOut size={18} /></button>
+            )}
+
             {usuario && (
               <div className="usuario">
                 <span className="avatar">{iniciales(usuario.nombre)}</span>
@@ -93,6 +106,7 @@ export default function Layout() {
         </header>
 
         <main className="contenido">
+          {errorSalida && <p role="alert" className="estado estado-error">{errorSalida}</p>}
           {cargando && <p className="estado">Cargando sesión…</p>}
           {!MODO_DESARROLLO && !cargando && !usuario && !error && <Login />}
           {error && (

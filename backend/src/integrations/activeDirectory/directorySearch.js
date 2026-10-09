@@ -29,7 +29,7 @@ export function escapeLdapFilter(value) {
 export function normalizeSearchTerm(value) {
   if (typeof value !== 'string') throw new TypeError('Búsqueda inválida');
   const query = value.trim().replace(/\s+/g, ' ');
-  if (query.length < 2 || query.length > 80 || /[\x00-\x1f\x7f]/.test(query)) {
+  if (query.length < 2 || query.length > 80 || /[\x00-\x1f\x7f]/.test(query) || !/[a-zA-Z0-9\u00C0-\u024F]/.test(query)) {
     throw new RangeError('La búsqueda debe tener entre 2 y 80 caracteres válidos.');
   }
   return query;

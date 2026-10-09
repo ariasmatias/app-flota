@@ -14,6 +14,9 @@ export function createApp({ config, sessionStore } = {}) {
   const sessionMiddleware = createSessionMiddleware(config, sessionStore);
   const app = express();
   app.set('env', config.environment);
+  // Solo confiar en el proxy local de Nginx al usar el piloto AD.
+  // El backend debe escuchar exclusivamente en 127.0.0.1.
+  if (config.authMode === 'ldap-gssapi') app.set('trust proxy', 'loopback');
   // No confiar en cabeceras de proxy sin definir antes la frontera de confianza.
   app.use(helmet());
   app.use(cors({

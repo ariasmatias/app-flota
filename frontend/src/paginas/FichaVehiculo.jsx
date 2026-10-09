@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, Truck } from 'lucide-react'
-import { MODO_DESARROLLO } from '../core/sesion/SesionContext'
+import { VISTAS_DEMO } from '../core/sesion/SesionContext'
 import { fichaCompleta } from '../core/datos/fichaVehiculo'
 import { flotaDePrueba } from '../core/datos/flotaDePrueba'
 import { ChipCategoria } from '../core/componentes/CategoriaLicencia'
@@ -41,9 +41,9 @@ function Historial({ titulo, columnas, filas, vacio = 'Sin registros.' }) {
 // Se llega desde la búsqueda por dominio de la pantalla principal.
 export default function FichaVehiculo() {
   const { dominio } = useParams()
-  const ficha = useMemo(() => (MODO_DESARROLLO ? fichaCompleta(flotaDePrueba(), dominio) : null), [dominio])
+  const ficha = useMemo(() => (VISTAS_DEMO ? fichaCompleta(flotaDePrueba(), dominio) : null), [dominio])
 
-  if (!MODO_DESARROLLO) {
+  if (!VISTAS_DEMO) {
     return (
       <section className="pagina">
         <Link to="/" className="volver"><ArrowLeft size={16} /> Volver al inicio</Link>

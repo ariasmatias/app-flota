@@ -88,6 +88,33 @@ body.dark .mant-error { color: #ff9b9b; }
 .mant-feedback { padding: 12px 16px; background: color-mix(in srgb, var(--verde) 12%, transparent); border-radius: 10px; font-size: 14px; }
 .mant-historial { padding: 11px 0; border-bottom: 1px solid var(--vidrio-borde); font-size: 13px; }
 
+/* Vehículos (M-01 ampliado) */
+.mant-filtros-2 { margin-top: 4px; }
+.mant-cuenta { margin-top: 10px; font-size: 12px; }
+.mant-linea { display: block; white-space: nowrap; }
+.mant td small.mant-linea { margin-top: 2px; }
+.mant-linea.fuerte { font-weight: 600; color: var(--texto); }
+.mant-datos dd small { display: block; font-weight: 500; color: var(--texto-2); margin-top: 3px; }
+.mant-mono { font-family: ui-monospace, Consolas, monospace; font-size: 13px !important; }
+.mant-anio { font-size: 15px; font-weight: 600; color: var(--texto-2); }
+.mant-fila-baja td { color: var(--texto-2); }
+.mant-fila-baja td .mant-dominio { opacity: .7; }
+.mant-cartel-baja { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding: 12px 16px; border-radius: 12px; font-size: 14px; background: color-mix(in srgb, var(--rojo) 12%, transparent); border: 1px solid color-mix(in srgb, var(--rojo) 30%, transparent); }
+.mant-aviso { display: flex; gap: 8px; align-items: flex-start; padding: 10px 14px; border-radius: 10px; font-size: 13px; line-height: 1.5; background: color-mix(in srgb, #b7791f 14%, transparent); }
+.mant-aviso svg { flex: none; margin-top: 2px; color: #b7791f; }
+.mant-aviso-chico { display: inline-flex !important; gap: 4px; align-items: center; color: #9a6514 !important; }
+body.dark .mant-aviso-chico, body.dark .mant-aviso svg { color: #f0b860 !important; }
+.mant-boton.peligro { background: var(--rojo); }
+.mant-boton.peligro:hover { background: color-mix(in srgb, var(--rojo) 85%, #000); }
+.mant-form-baja { border: 1px solid color-mix(in srgb, var(--rojo) 35%, transparent); }
+.mant-form-baja h3 { display: flex; gap: 8px; align-items: center; }
+.mant-cierre { padding: 14px 16px; border-radius: 12px; background: color-mix(in srgb, var(--texto) 4%, transparent); }
+.mant-cierre h4 { margin: 0 0 8px; font-size: 14px; }
+.mant-cierre ul { margin: 0 0 8px; padding-left: 20px; display: grid; gap: 4px; font-size: 13px; }
+.mant-lista-jefaturas { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.mant-lista-jefaturas li { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: center; padding: 10px 14px; border-radius: 10px; background: color-mix(in srgb, var(--texto) 4%, transparent); font-size: 13px; }
+.mant-lista-jefaturas small { color: var(--texto-2); }
+
 @media (max-width: 900px) { .mant-resumen { grid-template-columns: repeat(2, 1fr); } .mant-datos { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 700px) {
   .mant-resumen { grid-template-columns: 1fr 1fr; gap: 10px; }

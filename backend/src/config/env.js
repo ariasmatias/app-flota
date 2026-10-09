@@ -61,6 +61,7 @@ export function readEnv(source = process.env) {
     },
     integrationsMode: source.INTEGRATIONS_MODE ?? 'mock',
     authMode,
+    adDemoAllowedUsers: allowedUsers,
     uploadsDir: source.UPLOADS_DIR ?? './uploads',
     session: { secret, idleMs: idleMinutes * 60_000, secure },
   };

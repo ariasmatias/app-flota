@@ -23,6 +23,10 @@ export function createSessionRoutes({ config, provider }) {
     next();
   }
 
+  router.get('/modo', (_req, res) => {
+    res.json({ modo: config.authMode === 'development' ? 'simulado' : 'corporativo' });
+  });
+
   router.get('/', (req, res) => {
     if (!req.session.user) return res.status(401).json({ error: 'No autenticado' });
     res.json(publicUser(req.session.user));

@@ -49,6 +49,13 @@ export function createSessionRoutes({ config, provider }) {
       if (typeof usuario !== 'string' || typeof password !== 'string') {
         return res.status(400).json({ error: 'Usuario y contraseña requeridos' });
       }
+      // Impedir que una contraseña corporativa viaje por HTTP desde otra máquina.
+      // Producción sigue bloqueada hasta contar con TLS y autorización en BD.
+      const remote = req.socket.remoteAddress;
+      const loopback = remote === '127.0.0.1' || remote === '::1' || remote === '::ffff:127.0.0.1';
+      if (!req.secure && !loopback) {
+        return res.status(403).json({ error: 'El inicio de sesión requiere HTTPS' });
+      }
       let identity;
       try {
         identity = await provider.authenticateCredentials(usuario, password);

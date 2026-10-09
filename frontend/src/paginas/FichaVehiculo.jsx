@@ -73,17 +73,20 @@ export default function FichaVehiculo() {
         <div className="ficha-icono"><Truck size={28} /></div>
         <div>
           <span className="ficha-kicker">FICHA DEL VEHÍCULO · CONSULTA</span>
-          <h1><span className="ficha-dominio">{v.dominio}</span> {v.marca} {v.modelo}</h1>
+          <h1><span className="ficha-dominio">{v.dominio}</span> {v.marca} {v.modelo} {v.anio && <span className="ficha-anio">{v.anio}</span>}</h1>
           <p>Categoría requerida {ficha.categoria === 'Sin exigencia' ? 'sin exigencia' : <ChipCategoria codigo={ficha.categoria} conTitulo />} · {ficha.estado ? <Etiqueta>{ficha.estado}</Etiqueta> : 'sin estado'}</p>
+          <p className="ficha-tecnico">Flota {ficha.clase.toLowerCase()} · Alta {fecha(v.fecha_alta)}{v.fecha_baja ? ` · Baja ${fecha(v.fecha_baja)}` : ''} · Chasis <code>{v.nro_chasis ?? '—'}</code> · Motor <code>{v.nro_motor ?? '—'}</code></p>
         </div>
       </header>
+      {v.fecha_baja && <p className="ficha-baja">De baja desde el {fecha(v.fecha_baja)} · {v.motivo_baja}{v.nota_baja ? `: ${v.nota_baja}` : ''}. Se conserva todo el historial.</p>}
       <p className="ficha-demo"><b>Vista de prueba</b> · Datos ficticios del seed compartido. Solo lectura: los cambios se hacen en cada módulo.</p>
 
       <div className="ficha-resumen">
         <div className="vidrio"><span>Conductores hoy</span><strong>{ficha.conductoresHoy.length}</strong><small>{ficha.conductoresHoy.map((a) => a.persona).join(' · ') || 'Sin conductores'}</small></div>
         <div className="vidrio"><span>Póliza</span><strong>{ficha.polizaHoy?.nro_poliza ?? 'Sin cobertura'}</strong><small>{ficha.polizaHoy ? <>vence {fecha(ficha.polizaHoy.vence)} <Etiqueta>{polizaEstado}</Etiqueta></> : <Etiqueta tono="error">Revisar</Etiqueta>}</small></div>
         <div className="vidrio"><span>VTV</span><strong>{ficha.vtvHoy ? fecha(ficha.vtvHoy.vigente_hasta) : 'Sin VTV'}</strong><small>{vtvEstado ? <Etiqueta>{vtvEstado}</Etiqueta> : 'Sin dato'}</small></div>
-        <div className="vidrio"><span>Centro de costo</span><strong>{ficha.centroHoy?.nombre ?? 'Sin dato'}</strong><small>{ficha.centroHoy ? `Flota ${ficha.centroHoy.tipo_flota}` : 'Lo carga Finanzas'}</small></div>
+        <div className="vidrio"><span>Centro de costo</span><strong>{ficha.centroHoy ? `${ficha.centroHoy.codigo ?? ''} ${ficha.centroHoy.nombre}` : 'Sin dato'}</strong><small>{ficha.centroHoy ? `Gerencia: ${ficha.centroHoy.gerencia}` : 'Lo carga Finanzas'}</small></div>
+        <div className="vidrio"><span>Jefaturas</span><strong>{ficha.jefaturasHoy.length || 'Sin jefatura'}</strong><small>{ficha.jefaturasHoy.map((j) => j.nombre).join(' · ') || '—'}</small></div>
         <div className="vidrio"><span>Tarjeta YPF</span><strong>{ficha.tarjetas[0]?.numero_tarjeta ?? (ficha.tarjetas[0] ? 'Sin número' : 'Sin tarjeta')}</strong><small>{ficha.tarjetas[0] ? <><Etiqueta>{ficha.tarjetas[0].estado}</Etiqueta> {ficha.tarjetas[0].perfil}</> : '—'}</small></div>
         <div className="vidrio"><span>Tag de telepeaje</span><strong>{ficha.tagHoy?.nro_dispositivo ?? 'Sin tag'}</strong><small>{ficha.tagHoy ? <Etiqueta>{ficha.tagHoy.estado_tag}</Etiqueta> : '—'}</small></div>
       </div>
@@ -92,15 +95,21 @@ export default function FichaVehiculo() {
         filas={ficha.asignaciones.map((a) => ({ key: a.id, actual: a.vigente, celdas: [<b key="p">{a.persona}</b>, a.legajo, fecha(a.vigente_desde), a.vigente_hasta ? fecha(a.vigente_hasta) : <Etiqueta tono="ok">vigente</Etiqueta>, a.motivo ?? '—'] }))}
         vacio="Nunca tuvo conductores asignados." />
       <Historial titulo="Estados" columnas={['Estado', 'Desde', 'Hasta', 'Motivo']}
-        filas={ficha.estados.map((e) => ({ key: e.id, actual: !e.vigente_hasta, celdas: [<Etiqueta key="e">{e.estado}</Etiqueta>, fecha(e.vigente_desde), e.vigente_hasta ? fecha(e.vigente_hasta) : 'Actual', e.motivo ?? '—'] }))} />
+        filas={[
+          ...(v.fecha_baja ? [{ key: 'baja', actual: true, celdas: [<Etiqueta key="e">baja</Etiqueta>, fecha(v.fecha_baja), '—', [v.motivo_baja, v.nota_baja].filter(Boolean).join(': ')] }] : []),
+          ...ficha.estados.map((e) => ({ key: e.id, actual: !e.vigente_hasta && !v.fecha_baja, celdas: [<Etiqueta key="e">{e.estado}</Etiqueta>, fecha(e.vigente_desde), e.vigente_hasta ? fecha(e.vigente_hasta) : 'Actual', e.motivo ?? '—'] })),
+        ]} />
       <Historial titulo="Pólizas" columnas={['Póliza', 'Aseguradora', 'Cubierto desde', 'Hasta', 'Vence la póliza']}
         filas={ficha.polizas.map((p) => ({ key: p.id, actual: p.vigente, celdas: [<b key="n">{p.nro_poliza}</b>, p.aseguradora, fecha(p.vigente_desde), p.vigente_hasta ? fecha(p.vigente_hasta) : 'Cubierto', fecha(p.vence)] }))}
         vacio="Nunca estuvo cubierto por una póliza." />
       <Historial titulo="VTV" columnas={['Realizada', 'Vence', 'Situación']}
         filas={ficha.vtv.map((x, i) => ({ key: x.id, actual: i === 0, celdas: [fecha(x.vigente_desde), fecha(x.vigente_hasta), i === 0 ? <Etiqueta key="s">{vencimiento(x.vigente_hasta, ref)}</Etiqueta> : 'Anterior'] }))}
         vacio="Sin VTV cargada." />
-      <Historial titulo="Centro de costo" columnas={['Centro', 'Flota', 'Desde', 'Hasta']}
-        filas={ficha.centros.map((c) => ({ key: c.id, actual: c.vigente, celdas: [c.nombre, c.tipo_flota, fecha(c.vigente_desde), c.vigente_hasta ? fecha(c.vigente_hasta) : 'Actual'] }))} />
+      <Historial titulo="Centro de costo y gerencia" columnas={['Centro', 'Gerencia', 'Desde', 'Hasta']}
+        filas={ficha.centros.map((c) => ({ key: c.id, actual: c.vigente, celdas: [`${c.codigo ?? ''} ${c.nombre}`, <>{c.gerencia}{c.gerenciaDistinta && <small key="d" className="ficha-nota"> (distinta a la del centro de costo)</small>}</>, fecha(c.vigente_desde), c.vigente_hasta ? fecha(c.vigente_hasta) : 'Actual'] }))} />
+      <Historial titulo="Jefaturas" columnas={['Jefatura', 'Desde', 'Hasta']}
+        filas={ficha.jefaturas.map((j) => ({ key: j.id, actual: j.vigente, celdas: [j.nombre, fecha(j.vigente_desde), j.vigente_hasta ? fecha(j.vigente_hasta) : 'Vigente'] }))}
+        vacio="Sin jefaturas cargadas." />
       <Historial titulo="Multas" columnas={['Acta', 'Infracción', 'Responsable', 'Pago', 'Vence pago voluntario']}
         filas={ficha.multas.map((m) => ({ key: m.id, actual: m.estado_pago === 'pendiente', celdas: [<b key="a">{m.nro_acta}</b>, fecha(m.fecha_infraccion), m.responsable ?? 'Sin confirmar', <Etiqueta key="p">{m.estado_pago}</Etiqueta>, fecha(m.vence_pago_voluntario)] }))}
         vacio="Sin multas registradas." />

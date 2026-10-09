@@ -1,5 +1,6 @@
 import { hoy } from './dominio.js'
 import { leerTabla } from '../../core/datos/seed.js'
+import { completarFlota } from '../../core/datos/vehiculoProvisorio.js'
 
 // Arma los datos de la demo de Mantenimiento a partir del seed compartido
 // (database/seed/001_datos_demo.sql), el mismo que se carga en PostgreSQL y
@@ -10,7 +11,14 @@ export function datosDesdeSeed(sql, referencia = hoy()) {
   const tabla = (nombre) => leerTabla(sql, nombre, referencia)
   const categorias = tabla('categoria_licencia')
   const licCat = tabla('licencia_categoria')
-  const centros = tabla('centro_costo')
+  // Año, chasis, motor, clase, alta/baja, gerencia y jefaturas: provisorios hasta la migración 002.
+  const flota = completarFlota({
+    vehiculos: tabla('vehiculo'),
+    estados: tabla('vehiculo_estado'),
+    finanzas: tabla('vehiculo_finanzas'),
+    centros: tabla('centro_costo'),
+  })
+  const centros = flota.centros
   const documentos = tabla('documento')
   const versiones = tabla('documento_version')
   const vinculos = tabla('documento_vinculo')
@@ -36,16 +44,27 @@ export function datosDesdeSeed(sql, referencia = hoy()) {
       ...a,
       documento: documentoDe('autorizacion', a.id) ?? 'Documento de ejemplo',
     })),
-    vehiculos: tabla('vehiculo'),
-    estadosVehiculo: tabla('vehiculo_estado'),
+    vehiculos: flota.vehiculos,
+    estadosVehiculo: flota.estados,
     asignaciones: tabla('asignacion'),
     polizas: tabla('poliza'),
     polizasVehiculo: tabla('poliza_vehiculo'),
     vtv: tabla('vtv'),
-    centrosCosto: tabla('vehiculo_finanzas').map((f) => ({
+    // Catálogos (centro de costo con su gerencia, gerencias, jefaturas).
+    catalogoCentros: centros,
+    gerencias: flota.gerencias,
+    jefaturas: flota.jefaturas,
+    // Períodos por vehículo.
+    centrosCosto: flota.finanzas.map((f) => ({
       ...f,
       nombre: centros.find((c) => c.id === f.centro_costo_id)?.nombre ?? 'Sin centro de costo',
+      codigo: centros.find((c) => c.id === f.centro_costo_id)?.codigo ?? null,
     })),
+    vehiculoJefaturas: flota.vehiculoJefaturas,
+    // Lo que también se cierra al dar de baja (lo administran Finanzas y Comercial).
+    tarjetas: tabla('tarjeta'),
+    tarjetaPeriodos: tabla('tarjeta_periodo'),
+    tags: tabla('tag'),
     // Apoyo de la demo. La auditoría real (auditoria_evento) la escribe el backend.
     auditoria: [],
   }

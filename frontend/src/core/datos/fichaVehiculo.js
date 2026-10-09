@@ -1,4 +1,5 @@
 import { hoy, leerTabla } from './seed.js'
+import { completarFlota, CLASES_FLOTA } from './vehiculoProvisorio.js'
 
 // Ficha completa de un vehículo, con todo su historial, armada desde el seed
 // compartido. Es de solo lectura y la usa la búsqueda por dominio de la
@@ -13,18 +14,23 @@ export const normalizarDominio = (texto) => String(texto ?? '').toUpperCase().re
 
 export function tablasDeFlota(sql, referencia = hoy()) {
   const t = (nombre) => leerTabla(sql, nombre, referencia)
+  // Año, chasis, motor, clase, alta/baja, gerencia y jefaturas: provisorios hasta la migración 002.
+  const flota = completarFlota({ vehiculos: t('vehiculo'), estados: t('vehiculo_estado'), finanzas: t('vehiculo_finanzas'), centros: t('centro_costo') })
   return {
     referencia,
-    vehiculos: t('vehiculo'),
+    vehiculos: flota.vehiculos,
     categorias: t('categoria_licencia'),
-    estados: t('vehiculo_estado'),
+    estados: flota.estados,
+    gerencias: flota.gerencias,
+    jefaturas: flota.jefaturas,
+    vehiculoJefaturas: flota.vehiculoJefaturas,
     personas: t('persona'),
     asignaciones: t('asignacion'),
     polizas: t('poliza'),
     polizasVehiculo: t('poliza_vehiculo'),
     vtv: t('vtv'),
-    centros: t('centro_costo'),
-    finanzas: t('vehiculo_finanzas'),
+    centros: flota.centros,
+    finanzas: flota.finanzas,
     multas: t('multa'),
     tarjetas: t('tarjeta'),
     tarjetaPeriodos: t('tarjeta_periodo'),
@@ -37,10 +43,14 @@ export function tablasDeFlota(sql, referencia = hoy()) {
   }
 }
 
-const estadoActual = (t, vehiculoId) =>
-  t.estados.find((e) => e.vehiculo_id === vehiculoId && vigenteEn(e, t.referencia))?.estado ?? null
+// La baja es la fecha de baja (ya no es un estado).
+const estadoActual = (t, vehiculoId) => {
+  const v = t.vehiculos.find((x) => x.id === vehiculoId)
+  if (v?.fecha_baja && t.referencia >= v.fecha_baja) return 'baja'
+  return t.estados.find((e) => e.vehiculo_id === vehiculoId && vigenteEn(e, t.referencia))?.estado ?? null
+}
 
-// Vehículos que coinciden con lo escrito (dominio, marca o modelo). Prioriza el dominio.
+// Vehículos que coinciden con lo escrito (dominio, chasis, motor, marca o modelo). Prioriza el dominio.
 export function buscarVehiculos(t, texto, limite = 6) {
   const q = normalizarDominio(texto)
   const libre = String(texto ?? '').trim().toLowerCase()
@@ -48,8 +58,9 @@ export function buscarVehiculos(t, texto, limite = 6) {
   return t.vehiculos
     .map((v) => {
       const porDominio = v.dominio.includes(q)
+      const porNumero = q.length >= 4 && [v.nro_chasis, v.nro_motor].some((x) => normalizarDominio(x).includes(q))
       const porNombre = `${v.marca} ${v.modelo}`.toLowerCase().includes(libre)
-      return { v, puntaje: v.dominio === q ? 3 : porDominio ? 2 : porNombre ? 1 : 0 }
+      return { v, puntaje: v.dominio === q ? 4 : porDominio ? 3 : porNumero ? 2 : porNombre ? 1 : 0 }
     })
     .filter((x) => x.puntaje > 0)
     .sort((a, b) => b.puntaje - a.puntaje || a.v.dominio.localeCompare(b.v.dominio))
@@ -75,8 +86,17 @@ export function fichaCompleta(t, dominioBuscado) {
 
   const vtv = t.vtv.filter((x) => x.vehiculo_id === id).sort(porDesdeDesc)
 
-  const centros = t.finanzas.filter((f) => f.vehiculo_id === id).sort(porDesdeDesc).map((f) => ({
-    ...f, nombre: t.centros.find((c) => c.id === f.centro_costo_id)?.nombre ?? '—', vigente: vigenteEn(f, ref),
+  const centros = t.finanzas.filter((f) => f.vehiculo_id === id).sort(porDesdeDesc).map((f) => {
+    const cc = t.centros.find((c) => c.id === f.centro_costo_id)
+    return {
+      ...f, nombre: cc?.nombre ?? '—', codigo: cc?.codigo ?? null, vigente: vigenteEn(f, ref),
+      gerencia: t.gerencias.find((g) => g.id === f.gerencia_id)?.nombre ?? '—',
+      gerenciaDistinta: Boolean(cc && f.gerencia_id && cc.gerencia_id !== f.gerencia_id),
+    }
+  })
+
+  const jefaturas = t.vehiculoJefaturas.filter((j) => j.vehiculo_id === id).sort(porDesdeDesc).map((j) => ({
+    ...j, nombre: t.jefaturas.find((x) => x.id === j.jefatura_id)?.nombre ?? '—', vigente: vigenteEn(j, ref),
   }))
 
   const multas = t.multas.filter((m) => m.vehiculo_id === id)
@@ -119,6 +139,9 @@ export function fichaCompleta(t, dominioBuscado) {
     vtvHoy: vtv[0] ?? null,
     centros,
     centroHoy: centros.find((c) => c.vigente) ?? null,
+    jefaturas,
+    jefaturasHoy: jefaturas.filter((j) => j.vigente),
+    clase: CLASES_FLOTA.find((c) => c.valor === v.clase_flota)?.etiqueta ?? '—',
     multas,
     tarjetas,
     tags,

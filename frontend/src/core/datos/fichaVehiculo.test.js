@@ -40,3 +40,20 @@ test('casos de prueba: vehículo de baja con historia y 0 km sin póliza', () =>
   assert.equal(nuevo.polizaHoy, null)
   assert.equal(nuevo.vtvHoy, null)
 })
+
+test('campos nuevos (provisorios): búsqueda por chasis, gerencia, jefaturas y baja con motivo', () => {
+  assert.equal(buscarVehiculos(t, 'demochasis0000003')[0].dominio, 'AA003ZZ')
+  assert.equal(buscarVehiculos(t, 'DEMO-MOT-0012')[0].dominio, 'AA012ZZ')
+  const f = fichaCompleta(t, 'AA003ZZ')
+  assert.equal(f.vehiculo.anio, 2021)
+  assert.equal(f.clase, 'Operativa')
+  assert.equal(f.jefaturasHoy.length, 2)
+  assert.equal(f.centroHoy.gerencia, 'Mantenimiento')
+  const ejecutivo = fichaCompleta(t, 'AA014ZZ')
+  assert.equal(ejecutivo.clase, 'Ejecutiva')
+  assert.ok(ejecutivo.centroHoy.gerenciaDistinta) // gerencia distinta a la del centro de costo (puede pasar)
+  const baja = fichaCompleta(t, 'AA005ZZ')
+  assert.equal(baja.vehiculo.motivo_baja, 'Fin de vida útil')
+  assert.ok(!baja.estados.some((e) => e.estado === 'baja'))
+  assert.equal(baja.centroHoy, null) // se cerró en la fecha de baja
+})

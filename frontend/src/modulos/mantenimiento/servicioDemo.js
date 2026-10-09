@@ -36,6 +36,25 @@ export function guardarEstado(datos, vehiculoId, cambio, usuario) {
   return auditar(reglas.cambiarEstadoVehiculo(datos, vehiculoId, cambio), usuario, 'modificacion', 'vehiculo_estado', vehiculoId, null, cambio)
 }
 
+export function guardarBaja(datos, vehiculoId, baja, usuario) {
+  const v = datos.vehiculos.find((x) => x.id === vehiculoId)
+  const resultado = reglas.darDeBaja(datos, vehiculoId, baja)
+  return auditar(resultado, usuario, 'baja', 'vehiculo', vehiculoId, { fecha_baja: v?.fecha_baja ?? null }, { ...baja, cierra: reglas.queCierraLaBaja(datos, vehiculoId) })
+}
+
+export function guardarCentroCosto(datos, vehiculoId, cambio, usuario) {
+  return auditar(reglas.cambiarCentroCosto(datos, vehiculoId, cambio), usuario, 'modificacion', 'vehiculo_finanzas', vehiculoId, null, cambio)
+}
+
+export function guardarJefatura(datos, vehiculoId, alta, usuario) {
+  const resultado = reglas.agregarJefatura(datos, vehiculoId, alta)
+  return auditar(resultado, usuario, 'alta', 'vehiculo_jefatura', resultado.vehiculoJefaturas.at(-1).id, null, alta)
+}
+
+export function guardarQuitarJefatura(datos, filaId, hasta, usuario) {
+  return auditar(reglas.quitarJefatura(datos, filaId, hasta), usuario, 'anulacion', 'vehiculo_jefatura', filaId, null, { vigente_hasta: hasta })
+}
+
 export function guardarAsignacion(datos, nueva, usuario) {
   const resultado = reglas.asignar(datos, nueva)
   const a = resultado.asignaciones.at(-1)

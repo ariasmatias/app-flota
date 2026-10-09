@@ -4,7 +4,8 @@ import {
   hoy, sumarDias, normalizarDominio, altaVehiculo, corregirVehiculo, cambiarEstadoVehiculo, estadoVehiculoEn,
   validarAsignacion, asignar, asignarVarios, cerrarAsignacion, problemasDeAsignacion, crearPoliza, renovarPoliza,
   retirarVehiculoDePoliza, agregarVehiculoAPoliza, polizaDeVehiculoEn, revisarAutorizacion, fichaVehiculoEn,
-  estadoVencimiento,
+  estadoVencimiento, darDeBaja, queCierraLaBaja, deBajaEn, cambiarCentroCosto, agregarJefatura, quitarJefatura,
+  avisoGerencia, validarAsignacion as controles,
 } from './dominio.js'
 import { readFileSync } from 'node:fs'
 import { datosDesdeSeed } from './datosSeed.js'
@@ -19,11 +20,14 @@ const usuario = { id: 1, usuario: 'agomez' }
 test('el dominio se normaliza, se valida y no se repite', () => {
   assert.equal(normalizarDominio(' ab-123 cd '), 'AB123CD')
   const datos = datosIniciales()
-  const nuevo = altaVehiculo(datos, { dominio: 'ab 999 zz', marca: 'Fiat', modelo: 'Strada', vigente_desde: hoy() })
+  const base = { marca: 'Fiat', modelo: 'Strada', anio: 2024, clase_flota: 'operativa', vigente_desde: hoy() }
+  const nuevo = altaVehiculo(datos, { ...base, dominio: 'ab 999 zz' })
   assert.equal(nuevo.vehiculos.at(-1).dominio, 'AB999ZZ')
+  assert.equal(nuevo.vehiculos.at(-1).fecha_alta, hoy())
   assert.equal(estadoVehiculoEn(nuevo, nuevo.vehiculos.at(-1).id), 'activo')
-  assert.throws(() => altaVehiculo(nuevo, { dominio: 'AB999ZZ', marca: 'X', modelo: 'Y', vigente_desde: hoy() }), /ya está registrado/)
-  assert.throws(() => altaVehiculo(datos, { dominio: '12ABC', marca: 'X', modelo: 'Y', vigente_desde: hoy() }), /inválido/)
+  assert.throws(() => altaVehiculo(nuevo, { ...base, dominio: 'AB999ZZ' }), /ya está registrado \(Fiat Strada\)/)
+  assert.throws(() => altaVehiculo(datos, { ...base, dominio: '12ABC' }), /inválido/)
+  assert.equal(altaVehiculo(datos, { ...base, dominio: '867 kko' }).vehiculos.at(-1).dominio, '867KKO') // moto
 })
 
 test('corregir el dominio conserva el id y las referencias', () => {
@@ -44,7 +48,8 @@ test('cambiar estado cierra el período anterior sin borrarlo', () => {
   assert.equal(estadoVehiculoEn(r, 2, d(-1)), 'activo')
   assert.equal(estadoVehiculoEn(r, 2, hoy()), 'taller')
   assert.throws(() => cambiarEstadoVehiculo(datos, 2, { estado: 'activo', vigente_desde: hoy() }), /ya está/)
-  assert.throws(() => cambiarEstadoVehiculo(datos, 1, { estado: 'baja', motivo: 'x', vigente_desde: hoy() }), /asignaciones vigentes/)
+  assert.throws(() => cambiarEstadoVehiculo(datos, 1, { estado: 'baja', motivo: 'x', vigente_desde: hoy() }), /Dar de baja/)
+  assert.throws(() => cambiarEstadoVehiculo(datos, 5, { estado: 'taller', motivo: 'x', vigente_desde: hoy() }), /solo se puede consultar/)
 })
 
 test('la asignación valida licencia, categoría, autorización y superposición', () => {
@@ -155,4 +160,106 @@ test('la categoría se valida con las inclusiones oficiales', () => {
   assert.equal(validarAsignacion(datos, { persona_id: 2, vehiculo_id: 3, vigente_desde: hoy() }).find((x) => x.id === 'categoria').ok, false)
   // Paz (A.2.1, cuatriciclo) no puede manejar utilitarios.
   assert.equal(validarAsignacion(datos, { persona_id: 15, vehiculo_id: 1, vigente_desde: hoy() }).find((x) => x.id === 'categoria').ok, false)
+})
+
+// ───── M-01 ampliado (doc de Mariano 08/10): campos nuevos, baja, gerencia y jefaturas ─────
+
+test('alta: año, clase de flota y chasis único entre vehículos que siguen en la flota', () => {
+  const datos = datosIniciales()
+  const base = { dominio: 'AC100ZZ', marca: 'Ford', modelo: 'Ranger', anio: 2024, clase_flota: 'operativa', vigente_desde: hoy() }
+  assert.throws(() => altaVehiculo(datos, { ...base, anio: 24 }), /año/)
+  assert.throws(() => altaVehiculo(datos, { ...base, clase_flota: '' }), /clase de flota/)
+  assert.throws(() => altaVehiculo(datos, { ...base, nro_chasis: 'demochasis0000001' }), /chasis ya está en el vehículo AA001ZZ/)
+  // El de AA005ZZ (de baja) se puede reutilizar.
+  const ok = altaVehiculo(datos, { ...base, nro_chasis: 'DEMOCHASIS0000005', nro_motor: 'm-1' })
+  assert.equal(ok.vehiculos.at(-1).nro_chasis, 'DEMOCHASIS0000005')
+  assert.equal(ok.vehiculos.at(-1).nro_motor, 'M-1')
+})
+
+test('alta con centro de costo y varias jefaturas', () => {
+  const datos = datosIniciales()
+  const r = altaVehiculo(datos, { dominio: 'AC101ZZ', marca: 'Ford', modelo: 'Ranger', anio: 2024, clase_flota: 'operativa', vigente_desde: hoy(), centro_costo_id: 2, jefatura_ids: [4, 5] })
+  const id = r.vehiculos.at(-1).id
+  const ficha = fichaVehiculoEn(r, id)
+  assert.equal(ficha.centroCosto.centro_costo_id, 2)
+  assert.equal(ficha.gerencia.nombre, 'Mantenimiento') // propuesta desde el centro de costo
+  assert.equal(ficha.jefaturas.length, 2)
+})
+
+test('la baja es una fecha: el vehículo de baja se consulta pero no se modifica', () => {
+  const datos = datosIniciales()
+  const v5 = datos.vehiculos.find((v) => v.id === 5)
+  assert.equal(v5.motivo_baja, 'Fin de vida útil')
+  assert.ok(deBajaEn(v5))
+  assert.equal(estadoVehiculoEn(datos, 5), 'baja')
+  assert.equal(estadoVehiculoEn(datos, 5, d(-61)), 'activo') // antes de la baja
+  assert.ok(!datos.estadosVehiculo.some((e) => e.estado === 'baja')) // ya no es un estado
+  assert.throws(() => corregirVehiculo(datos, 5, { modelo: 'X' }), /solo se puede consultar/)
+  assert.equal(datos.vehiculos.find((v) => v.id === 19).motivo_baja, 'Otro')
+})
+
+test('dar de baja muestra y cierra todo junto en la fecha de baja', () => {
+  const datos = datosIniciales()
+  const abiertos = queCierraLaBaja(datos, 1)
+  assert.ok(abiertos.asignaciones.length >= 1)
+  assert.equal(abiertos.centros.length, 1)
+  assert.ok(abiertos.polizas.length >= 1)
+  assert.equal(abiertos.tags.length, 1)
+  const r = darDeBaja(datos, 1, { fecha_baja: hoy(), motivo_baja: 'Venta' })
+  const v = r.vehiculos.find((x) => x.id === 1)
+  assert.equal(v.fecha_baja, hoy())
+  assert.equal(queCierraLaBaja(r, 1).asignaciones.length, 0)
+  assert.equal(queCierraLaBaja(r, 1).centros.length, 0)
+  assert.equal(queCierraLaBaja(r, 1).polizas.length, 0)
+  assert.equal(queCierraLaBaja(r, 1).tags.length, 0)
+  assert.equal(queCierraLaBaja(r, 1).tarjetas.length, 0)
+  assert.ok(r.tarjetaPeriodos.some((p) => p.estado === 'baja' && p.vigente_desde === hoy()))
+  assert.equal(estadoVehiculoEn(r, 1), 'baja')
+  assert.equal(estadoVehiculoEn(r, 1, d(-1)), 'activo') // el historial queda
+  // Ya no se le puede asignar conductor.
+  assert.equal(Object.fromEntries(controles(r, { persona_id: 2, vehiculo_id: 1, vigente_desde: hoy() }).map((c) => [c.id, c.ok])).vehiculo, false)
+})
+
+test('reglas de la baja: fecha, motivo, nota y todo o nada', () => {
+  const datos = datosIniciales()
+  const alta = datos.vehiculos.find((v) => v.id === 20).fecha_alta
+  assert.throws(() => darDeBaja(datos, 20, { fecha_baja: sumarDias(alta, -1), motivo_baja: 'Venta' }), /anterior a la de alta/)
+  assert.throws(() => darDeBaja(datos, 20, { fecha_baja: d(1), motivo_baja: 'Venta' }), /futura/)
+  assert.throws(() => darDeBaja(datos, 20, { fecha_baja: hoy(), motivo_baja: '' }), /motivo/)
+  assert.throws(() => darDeBaja(datos, 20, { fecha_baja: hoy(), motivo_baja: 'Otro' }), /nota/)
+  assert.throws(() => darDeBaja(datos, 5, { fecha_baja: hoy(), motivo_baja: 'Venta' }), /de baja desde/)
+  // AA001ZZ cambió de centro de costo hace 10 días: no puede darse de baja antes de eso.
+  const antes = structuredClone(datos)
+  assert.throws(() => darDeBaja(datos, 1, { fecha_baja: d(-20), motivo_baja: 'Venta' }), /centro de costo empieza/)
+  assert.deepEqual(datos, antes) // no cerró nada
+})
+
+test('centro de costo y gerencia: se propone la del centro, pero puede ser otra', () => {
+  const datos = datosIniciales()
+  const r = cambiarCentroCosto(datos, 2, { centro_costo_id: 1, vigente_desde: hoy() })
+  assert.equal(fichaVehiculoEn(r, 2).gerencia.nombre, 'Operaciones')
+  assert.equal(fichaVehiculoEn(r, 2, d(-1)).centroCosto.centro_costo_id, 2) // historial
+  const gg = datos.gerencias.find((g) => g.nombre === 'Gerencia General').id
+  const otra = cambiarCentroCosto(datos, 2, { centro_costo_id: 1, gerencia_id: gg, vigente_desde: hoy() })
+  assert.equal(fichaVehiculoEn(otra, 2).gerencia.nombre, 'Gerencia General')
+  assert.match(avisoGerencia(datos, 1, gg), /Puede pasar/)
+  assert.equal(avisoGerencia(datos, 1, null), null)
+  assert.throws(() => cambiarCentroCosto(datos, 2, { centro_costo_id: 8, vigente_desde: hoy() }), /inactivo/)
+  // AA014ZZ ya viene con gerencia distinta a la de su centro de costo (caso de prueba).
+  assert.equal(fichaVehiculoEn(datos, 14).gerencia.nombre, 'Gerencia General')
+})
+
+test('jefaturas: varias por vehículo, con historial', () => {
+  const datos = datosIniciales()
+  assert.equal(fichaVehiculoEn(datos, 3).jefaturas.length, 2)
+  assert.equal(fichaVehiculoEn(datos, 20).jefaturas.length, 0)
+  const r = agregarJefatura(datos, 20, { jefatura_id: 1, vigente_desde: hoy() })
+  assert.equal(fichaVehiculoEn(r, 20).jefaturas[0].nombre, 'Cuadrilla Norte (ejemplo)')
+  assert.throws(() => agregarJefatura(r, 20, { jefatura_id: 1, vigente_desde: hoy() }), /ya está en/)
+  const fila = r.vehiculoJefaturas.at(-1)
+  assert.throws(() => quitarJefatura(r, fila.id, hoy()), /posterior al inicio/)
+  const fila3 = datos.vehiculoJefaturas.find((j) => j.vehiculo_id === 3)
+  const q = quitarJefatura(datos, fila3.id, hoy())
+  assert.equal(fichaVehiculoEn(q, 3).jefaturas.length, 1)
+  assert.equal(fichaVehiculoEn(q, 3, d(-1)).jefaturas.length, 2)
 })

@@ -74,7 +74,8 @@ export default function FormAsignacion({ datos, usuario, hecho, vehiculoFijo = n
           opciones={datos.vehiculos.map((v) => ({
             valor: v.id,
             etiqueta: v.dominio,
-            detalle: `· ${v.marca} ${v.modelo}${estadoVehiculoEn(datos, v.id) === 'baja' ? ' (baja)' : ''}`,
+            detalle: `· ${v.marca} ${v.modelo}${estadoVehiculoEn(datos, v.id) === 'baja' ? ' (de baja)' : ''}`,
+            deshabilitada: estadoVehiculoEn(datos, v.id) === 'baja',
           }))}
         />
         <label>Desde<input required type="date" max={hoy()} value={desde} onChange={(e) => setDesde(e.target.value)} /></label>

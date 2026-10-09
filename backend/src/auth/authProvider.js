@@ -1,5 +1,6 @@
 import { ConfigurationError } from '../config/env.js';
 import { developmentAuthProvider } from './developmentAuthProvider.js';
+import { createLdapGssapiAuthenticator } from './ldapGssapiAuthenticator.js';
 import { kerberosAuthProvider } from './kerberosAuthProvider.js';
 
 /**
@@ -31,6 +32,10 @@ import { kerberosAuthProvider } from './kerberosAuthProvider.js';
  */
 export function createAuthProvider(config) {
   if (config.authMode === 'development') return developmentAuthProvider(config);
+  if (config.authMode === 'ldap-gssapi') {
+    const authenticateCredentials = createLdapGssapiAuthenticator();
+    return { assertReady() {}, authenticateCredentials };
+  }
   if (config.authMode === 'kerberos') return kerberosAuthProvider();
   throw new ConfigurationError('Proveedor de autenticación no soportado.');
 }
